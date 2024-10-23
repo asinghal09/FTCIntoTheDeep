@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode;
 
-
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.acmerobotics.dashboard.config.Config;
@@ -12,7 +11,13 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 
 @Config
 @TeleOp
-public class ArmPID extends LinearOpMode {
+
+public class IntoTheDeepTeleOp extends LinearOpMode {
+
+    DcMotor frontLeft;
+    DcMotor frontRight;
+    DcMotor backRight;
+    DcMotor backLeft;
 
     DcMotorEx armLeft;
     DcMotorEx armRight;
@@ -22,8 +27,9 @@ public class ArmPID extends LinearOpMode {
 
     boolean isIntaking = false;
     boolean previousAState = false;
-    double clawOpen = 0.3, clawClose = 0.55;
-    public static double speedDivider = 6;
+    public static double clawOpen = 0.25;
+    public static double clawClose = 0.51;
+    public static double speedDivider = 8;
     public static double jointPos = 0;
 
 
@@ -39,16 +45,26 @@ public class ArmPID extends LinearOpMode {
     private boolean pidEnabled = true;    //Track if PID is active
 
 
-
     // Time tracking for PID calculation
-        private long lastTime;
+    private long lastTime;
 
-     // Predefined positions for the arm
-     public static int armInitPos= 0;
-     public static  int armIntakePos = 850;
-     public static int armDeliverPos = 500;
+    // Predefined positions for the arm
+    public static int armInitPos = 0;
+    public static int armIntakePos = 760;
+    public static int armDeliverPos = 500;
+    public static int armDriveAroundPos = 145;
+
     @Override
     public void runOpMode() throws InterruptedException {
+
+        frontLeft = hardwareMap.get(DcMotor.class, "frontLeft");
+        frontRight = hardwareMap.get(DcMotor.class, "frontRight");
+        backLeft = hardwareMap.get(DcMotor.class, "backLeft");
+        backRight = hardwareMap.get(DcMotor.class, "backRight");
+
+
+        frontLeft.setDirection(DcMotorSimple.Direction.REVERSE);
+        backLeft.setDirection(DcMotorSimple.Direction.REVERSE);
         claw = hardwareMap.get(Servo.class, "claw");
         joint = hardwareMap.get(Servo.class, "joint");
         armLeft = hardwareMap.get(DcMotorEx.class, "armLeft");
@@ -60,40 +76,65 @@ public class ArmPID extends LinearOpMode {
         armLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         armRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         armLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        
 
 
         // FTC Dashboard
         FtcDashboard dashboard = FtcDashboard.getInstance();
 
-
+        joint.setPosition(0.22);
         waitForStart();
         lastTime = System.currentTimeMillis();
 
-        while(opModeIsActive()){
+        while (opModeIsActive()) {
 
-            if (gamepad1.b)
-                joint.setPosition(jointPos);
+            double driveLeft = gamepad1.left_stick_y/2;
+            double driveRight = gamepad1.right_stick_y/2;
+            double strafe = gamepad1.right_stick_x/2;
+
+            frontLeft.setPower(driveLeft);
+            frontRight.setPower(driveRight);
+            backLeft.setPower(driveLeft);
+            backRight.setPower(driveRight);
+            if (gamepad1.left_bumper){
+                frontLeft.setPower(0.5);
+                frontRight.setPower(-0.5);
+                backLeft.setPower(-0.5);
+                backRight.setPower(0.5);
+            }
+            if (gamepad1.right_bumper){
+                frontLeft.setPower(-0.5);
+                frontRight.setPower(0.5);
+                backLeft.setPower(0.5);
+                backRight.setPower(-0.5);
+            }
+
+
+            //if (gamepad2.b)
+                //joint.setPosition(jointPos);
 
 
             // Read joystick input (assuming right stick Y-axis controls the motor position)
-            double joystickInput = gamepad1.right_stick_y;  
+            double joystickInput = gamepad2.right_stick_y;
 
             // Check for button presses to set predefined positions
-            if (gamepad1.dpad_right) {       //set arm & joint to init position
+            if (gamepad2.dpad_right) {       //set arm & joint to init position
                 joint.setPosition(0.22);
                 claw.setPosition(clawClose);
                 setpoint = armInitPos;
                 pidEnabled = true;
-            } else if (gamepad1.dpad_down) {    //set arm and joint position for intaking
+
+            } else if (gamepad2.dpad_down) {    //set arm and joint position for intaking
                 //joint.setPosition();
                 setpoint = armIntakePos;
-                joint.setPosition(0.65);
+                joint.setPosition(0.35);
                 pidEnabled = true;
-            } else if (gamepad1.dpad_up) {    //arm and joint position for delivery
-
+            } else if (gamepad2.dpad_up) {    //arm and joint position for delivery
                 setpoint = armDeliverPos;
-                joint.setPosition(0.45);
+                joint.setPosition(0.5);
+                pidEnabled = true;
+            } else if (gamepad2.dpad_left){
+                setpoint = armDriveAroundPos;
+                joint.setPosition(0.95);
                 pidEnabled = true;
             }
 
@@ -101,9 +142,9 @@ public class ArmPID extends LinearOpMode {
             if (Math.abs(joystickInput) > 0.05) {  // Threshold to avoid noise
                 // Disable PID control and allow manual control
                 pidEnabled = false;
-                armLeft.setPower(joystickInput/speedDivider);
-                armRight.setPower(joystickInput/speedDivider);
-                
+                armLeft.setPower(joystickInput / speedDivider);
+                armRight.setPower(joystickInput / speedDivider);
+
             } else if (!pidEnabled) {
                 //joystick has been released
                 setpoint = armRight.getCurrentPosition();
@@ -111,7 +152,7 @@ public class ArmPID extends LinearOpMode {
                 integralSum = 0;
                 lastError = 0;
             }
-                // When joystick is not moving and PID is enabled, continue with PID control
+            // When joystick is not moving and PID is enabled, continue with PID control
             if (pidEnabled) {
                 // Apply PID control
                 double currentPosition = armRight.getCurrentPosition();
@@ -132,7 +173,7 @@ public class ArmPID extends LinearOpMode {
                 double iTerm = Ki * integralSum;
 
                 // Derivative term
-                double derivative = (error - lastError)/deltaTime;
+                double derivative = (error - lastError) / deltaTime;
                 double dTerm = Kd * derivative;
 
                 // Calculate final PID output
@@ -142,11 +183,11 @@ public class ArmPID extends LinearOpMode {
                 output = Math.max(-1, Math.min(output, 1));
 
                 // Set motor power based on PID output
-                armLeft.setPower(output /speedDivider);
-                armRight.setPower(output /speedDivider);
+                armLeft.setPower(output / speedDivider);
+                armRight.setPower(output / speedDivider);
 
                 lastError = error;
-            telemetry.addData("output", output);
+                telemetry.addData("output", output);
             }
             // Send telemetry to the dashboard
             telemetry.addData("Joystick Input", joystickInput);
@@ -158,7 +199,7 @@ public class ArmPID extends LinearOpMode {
 
 
             // Toggle open/close claw when 'A' button is pressed
-            boolean currentAState = gamepad1.a;
+            boolean currentAState = gamepad2.a;
 
             if (currentAState && !previousAState) {
                 // Toggle the spinning state
@@ -173,20 +214,7 @@ public class ArmPID extends LinearOpMode {
             }
             // Update the previous state of the 'A' button
             previousAState = currentAState;
-            
-
         }
 
     }
 }
-
-
-
-    /*
-    joint intake pos = 0.78
-    joint lift after intake pos = 0.9
-
-    arm max pos = 870
-
-     */
-
