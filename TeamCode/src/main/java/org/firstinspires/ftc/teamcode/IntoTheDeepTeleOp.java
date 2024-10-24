@@ -27,10 +27,10 @@ public class IntoTheDeepTeleOp extends LinearOpMode {
 
     boolean isIntaking = false;
     boolean previousAState = false;
-    public static double clawOpen = 0.25;
-    public static double clawClose = 0.51;
+    public static double clawOpen = 0.225;
+    public static double clawClose = 0.4;
     public static double speedDivider = 8;
-    public static double jointPos = 0;
+    public static double jointPos = 0.3;
 
 
     // PID coefficients
@@ -50,9 +50,9 @@ public class IntoTheDeepTeleOp extends LinearOpMode {
 
     // Predefined positions for the arm
     public static int armInitPos = 0;
-    public static int armIntakePos = 760;
-    public static int armDeliverPos = 500;
-    public static int armDriveAroundPos = 145;
+    public static int armIntakePos = 740;
+    public static int armDeliverPos = 490;
+    public static int armDriveAroundPos = 170;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -81,14 +81,15 @@ public class IntoTheDeepTeleOp extends LinearOpMode {
         // FTC Dashboard
         FtcDashboard dashboard = FtcDashboard.getInstance();
 
-        joint.setPosition(0.22);
+        joint.setPosition(0.1);
+
         waitForStart();
         lastTime = System.currentTimeMillis();
 
         while (opModeIsActive()) {
 
-            double driveLeft = gamepad1.left_stick_y/2;
-            double driveRight = gamepad1.right_stick_y/2;
+            double driveLeft = gamepad1.right_stick_y*-0.75;
+            double driveRight = gamepad1.left_stick_y*-0.75;
             double strafe = gamepad1.right_stick_x/2;
 
             frontLeft.setPower(driveLeft);
@@ -96,21 +97,26 @@ public class IntoTheDeepTeleOp extends LinearOpMode {
             backLeft.setPower(driveLeft);
             backRight.setPower(driveRight);
             if (gamepad1.left_bumper){
-                frontLeft.setPower(0.5);
-                frontRight.setPower(-0.5);
-                backLeft.setPower(-0.5);
-                backRight.setPower(0.5);
-            }
-            if (gamepad1.right_bumper){
                 frontLeft.setPower(-0.5);
                 frontRight.setPower(0.5);
                 backLeft.setPower(0.5);
                 backRight.setPower(-0.5);
             }
+            if (gamepad1.right_bumper){
+                frontLeft.setPower(0.5);
+                frontRight.setPower(-0.5);
+                backLeft.setPower(-0.5);
+                backRight.setPower(0.5);
+            }
 
 
-            //if (gamepad2.b)
-                //joint.setPosition(jointPos);
+            if (gamepad2.b){
+                joint.setPosition(jointPos);}
+            else if (gamepad2.left_bumper){
+                joint.setPosition(joint.getPosition()+0.05);
+            } else if (gamepad2.right_bumper){
+                joint.setPosition(joint.getPosition()-0.05);
+            }
 
 
             // Read joystick input (assuming right stick Y-axis controls the motor position)
@@ -118,7 +124,7 @@ public class IntoTheDeepTeleOp extends LinearOpMode {
 
             // Check for button presses to set predefined positions
             if (gamepad2.dpad_right) {       //set arm & joint to init position
-                joint.setPosition(0.22);
+                joint.setPosition(0.075);
                 claw.setPosition(clawClose);
                 setpoint = armInitPos;
                 pidEnabled = true;
@@ -126,15 +132,15 @@ public class IntoTheDeepTeleOp extends LinearOpMode {
             } else if (gamepad2.dpad_down) {    //set arm and joint position for intaking
                 //joint.setPosition();
                 setpoint = armIntakePos;
-                joint.setPosition(0.35);
+                joint.setPosition(0.15);
                 pidEnabled = true;
             } else if (gamepad2.dpad_up) {    //arm and joint position for delivery
                 setpoint = armDeliverPos;
-                joint.setPosition(0.5);
+                joint.setPosition(0.4);
                 pidEnabled = true;
-            } else if (gamepad2.dpad_left){
+            } else if (gamepad2.dpad_left){   //driving around position
                 setpoint = armDriveAroundPos;
-                joint.setPosition(0.95);
+                joint.setPosition(0.8);
                 pidEnabled = true;
             }
 
@@ -215,6 +221,5 @@ public class IntoTheDeepTeleOp extends LinearOpMode {
             // Update the previous state of the 'A' button
             previousAState = currentAState;
         }
-
     }
 }
