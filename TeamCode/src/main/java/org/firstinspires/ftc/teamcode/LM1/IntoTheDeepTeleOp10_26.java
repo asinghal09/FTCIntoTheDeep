@@ -1,5 +1,6 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.LM1;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.acmerobotics.dashboard.config.Config;
@@ -11,8 +12,9 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 
 @Config
 @TeleOp
+@Disabled
 
-public class IntoTheDeepTeleOp extends LinearOpMode {
+public class IntoTheDeepTeleOp10_26 extends LinearOpMode {
 
     DcMotor frontLeft;
     DcMotor frontRight;
@@ -50,8 +52,8 @@ public class IntoTheDeepTeleOp extends LinearOpMode {
 
     // Predefined positions for the arm
     public static int armInitPos = 0;
-    public static int armIntakePos = 740;
-    public static int armDeliverPos = 490;
+    public static int armIntakePos = 735;
+    public static int armDeliverPos = 460;
     public static int armDriveAroundPos = 170;
 
     @Override
@@ -81,9 +83,10 @@ public class IntoTheDeepTeleOp extends LinearOpMode {
         // FTC Dashboard
         FtcDashboard dashboard = FtcDashboard.getInstance();
 
-        joint.setPosition(0.1);
+
 
         waitForStart();
+        joint.setPosition(0.1);
         lastTime = System.currentTimeMillis();
 
         while (opModeIsActive()) {
@@ -124,7 +127,7 @@ public class IntoTheDeepTeleOp extends LinearOpMode {
 
             // Check for button presses to set predefined positions
             if (gamepad2.dpad_right) {       //set arm & joint to init position
-                joint.setPosition(0.075);
+                joint.setPosition(0.1);
                 claw.setPosition(clawClose);
                 setpoint = armInitPos;
                 pidEnabled = true;
