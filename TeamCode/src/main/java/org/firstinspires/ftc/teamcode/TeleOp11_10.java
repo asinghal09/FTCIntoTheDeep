@@ -42,7 +42,7 @@ public class TeleOp11_10 extends LinearOpMode {
     // PID coefficients
     public static double Kp = 0.019;   // Proportional Gain
     public static double Ki = 0.00015;    // Integral Gain
-    public static double Kd = 0;    // Derivative Gain
+    public static double Kd = 0.00001;    // Derivative Gain
 
     // Integral and previous error for PID calculation
     private double setpoint = 0;   // PID target position
@@ -79,6 +79,7 @@ public class TeleOp11_10 extends LinearOpMode {
 
         slidesJoint.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         slidesJoint.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        slidesJoint.setDirection(DcMotorSimple.Direction.REVERSE);
         slides.setDirection(DcMotorSimple.Direction.REVERSE);
         slides.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
@@ -91,14 +92,17 @@ public class TeleOp11_10 extends LinearOpMode {
         FtcDashboard dashboard = FtcDashboard.getInstance();
 
         waitForStart();
+        if(isStopRequested()) return;
 
         lastTime = System.currentTimeMillis();
 
         while (opModeIsActive()) {
 
-            double driveLeft = gamepad1.right_stick_y*-0.75;
-            double driveRight = gamepad1.left_stick_y*-0.75;
+            double driveLeft = gamepad1.left_stick_y*0.75;
+            double driveRight = gamepad1.right_stick_y*0.75;
             double strafe = gamepad1.right_stick_x/2;
+
+
 
             //driving controls
             frontLeft.setPower(driveLeft);
@@ -106,16 +110,16 @@ public class TeleOp11_10 extends LinearOpMode {
             backLeft.setPower(driveLeft);
             backRight.setPower(driveRight);
             if (gamepad1.left_bumper){
-                frontLeft.setPower(-0.5);
-                frontRight.setPower(0.5);
-                backLeft.setPower(0.5);
-                backRight.setPower(-0.5);
-            }
-            if (gamepad1.right_bumper){
                 frontLeft.setPower(0.5);
                 frontRight.setPower(-0.5);
                 backLeft.setPower(-0.5);
                 backRight.setPower(0.5);
+            }
+            if (gamepad1.right_bumper){
+                frontLeft.setPower(-0.5);
+                frontRight.setPower(0.5);
+                backLeft.setPower(0.5);
+                backRight.setPower(-0.5);
             }
 
             if (gamepad2.x){
@@ -139,22 +143,22 @@ public class TeleOp11_10 extends LinearOpMode {
 
             // Check for button presses to set predefined positions
             if (gamepad2.dpad_right) {       //set arm & joint to init position
-                joint.setPosition(0.1);
+                //joint.setPosition(0.1);
                 setpoint = armInitPos;
                 pidEnabled = true;
 
             } else if (gamepad2.dpad_down) {    //set arm and joint position for intaking
                 //joint.setPosition();
                 setpoint = armIntakePos;
-                joint.setPosition(0.15);
+                //joint.setPosition(0.15);
                 pidEnabled = true;
             } else if (gamepad2.dpad_up) {    //arm and joint position for delivery
                 setpoint = armDeliverPos;
-                joint.setPosition(0.4);
+                //joint.setPosition(0.4);
                 pidEnabled = true;
             } else if (gamepad2.dpad_left){   //driving around position
                 setpoint = armDriveAroundPos;
-                joint.setPosition(0.8);
+               //joint.setPosition(0.8);
                 pidEnabled = true;
             }
 
@@ -210,9 +214,10 @@ public class TeleOp11_10 extends LinearOpMode {
             telemetry.addData("Joystick Input", joystickInput);
             telemetry.addData("PID Enabled", pidEnabled);
             telemetry.addData("Setpoint", setpoint);
-            telemetry.addData("Motor Position ", slidesJoint.getCurrentPosition());
+            telemetry.addData("Slides Joint Pos ", slidesJoint.getCurrentPosition());
             telemetry.addData("Slides Pos", slides.getCurrentPosition());
             telemetry.addData("Slides Target Position", slidesTargetPos);
+            telemetry.addData("Joint Position", joint.getPosition());
             telemetry.update();
 
 
