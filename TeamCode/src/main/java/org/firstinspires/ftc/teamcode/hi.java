@@ -12,7 +12,7 @@ public class hi extends LinearOpMode {
     private DcMotor armMotor;
     private DcMotor frontLeft, frontRight, backLeft, backRight;
 
-    private PIDController armPIDController;
+    //private PIDController armPIDController;
 
     // PID Constants
     private static final double KP_ARM = 0.1;
@@ -41,7 +41,7 @@ public class hi extends LinearOpMode {
         armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
         // Initialize PID Controller
-        armPIDController = new PIDController(KP_ARM, KI_ARM, KD_ARM);
+        //armPIDController = new PIDController(KP_ARM, KI_ARM, KD_ARM);
 
         waitForStart();
 
@@ -59,12 +59,12 @@ public class hi extends LinearOpMode {
         // PID control loop for the arm
         while (opModeIsActive() && armMotor.isBusy()) {
             double currentPosition = armMotor.getCurrentPosition();
-            double output = armPIDController.calculate(TARGET_ARM_POSITION, currentPosition);
+            //double output = armPIDController.calculate(TARGET_ARM_POSITION, currentPosition);
 
-            armMotor.setPower(output);
+            //armMotor.setPower(output);
 
             telemetry.addData("Current Position", currentPosition);
-            telemetry.addData("PID Output", output);
+            //telemetry.addData("PID Output", output);
             telemetry.update();
         }
         armMotor.setPower(0); // Stop the arm when done
