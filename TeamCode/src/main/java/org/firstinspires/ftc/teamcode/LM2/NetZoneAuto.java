@@ -26,39 +26,65 @@ public class NetZoneAuto extends LinearOpMode {
         Trajectory toSubmersible = drive.trajectoryBuilder(new Pose2d(6, 64, Math.toRadians(270)))
                 .forward(15)
                 .addTemporalMarker(0.1, () -> {
-                    slidesSubsystem.setSlidesJointPos(1600);
-                    //slidesSubsystem.update();
+                    slidesSubsystem.setSlidesJointPos(1650,2);
 
                 })
                 .addTemporalMarker(3, () -> {
-                    slidesSubsystem.setSlides(150);
+                    slidesSubsystem.setSlides(500);
                     slidesSubsystem.setJointPos(0.625);
                 })
 
                 .build();
 
-
         Trajectory deliverOne = drive.trajectoryBuilder(toSubmersible.end())
-                .forward(11.25)
-                .addTemporalMarker(7, ()->{
-                    slidesSubsystem.setSlidesJointPos(1000);
-                }).addTemporalMarker(8, ()->{
-                    slidesSubsystem.wheelsDeliver();
+                .forward(12)
+                .addTemporalMarker(6, ()->{
+                    slidesSubsystem.setSlidesJointPos(1000,6);
                 })
-                .addTemporalMarker(9, ()->{
-                    slidesSubsystem.turnOffWheels();
-                })
-
                 .build();
-        Trajectory pickOne = drive.trajectoryBuilder(deliverOne.end())
+        Trajectory backUp = drive.trajectoryBuilder(deliverOne.end())
                 .back(8)
-                .strafeTo(new Vector2d(30,40))
+                .addTemporalMarker(11, ()->{
+                    slidesSubsystem.setJointPos(.7);
+                    slidesSubsystem.setSlidesJointPos(400,4);
+                    slidesSubsystem.setSlides(0);
+                })
+                .build();
+        Trajectory pickOne = drive.trajectoryBuilder(backUp.end())
+                .strafeTo(new Vector2d(48,39))
+                .build();
+        Trajectory basketLineup = drive.trajectoryBuilder(pickOne.end())
+                .lineToSplineHeading(new Pose2d(52, 48, Math.toRadians(45)))
+                .addTemporalMarker(12, () -> {
+                    slidesSubsystem.setSlidesJointPos(2000,2);
+
+                })
+                .addTemporalMarker(15, () -> {
+                    slidesSubsystem.setSlides(4700);
+                    slidesSubsystem.setJointPos(0.7);
+
+
+                })
+                .build();
+        Trajectory deliver = drive.trajectoryBuilder(basketLineup.end())
+                .forward(7)
+                //.addTemporalMarker(16, () -> {
+                  //  slidesSubsystem.spinnyDeliver();
+                //})
+                //.addTemporalMarker(18, () -> {
+                    //slidesSubsystem.turnOffSpinny();
+               //})
+                .build();
+        Trajectory pickTwo = drive.trajectoryBuilder(deliver.end())
+                .lineToSplineHeading(new Pose2d(60, 39, Math.toRadians(45)))
+                .addTemporalMarker(20,()->{
+                    //slidesSubsystem.setSlidesJointPos(700);
+                })
                 .build();
 
 
 
         slidesSubsystem.setJointPos(0.15);
-
 
         waitForStart();
         drive.followTrajectory(toSubmersible);
@@ -69,6 +95,36 @@ public class NetZoneAuto extends LinearOpMode {
         }
         drive.followTrajectory(deliverOne);
 
+        timer.reset();
+        while(opModeIsActive() && timer.seconds() < 3){
+            slidesSubsystem.update();
+
+        }
+        slidesSubsystem.spinnyDeliver();
+        drive.followTrajectory(backUp);
+        drive.followTrajectory(pickOne);
+
+        timer.reset();
+        while(opModeIsActive() && timer.seconds() < 1.5){
+            slidesSubsystem.update();
+        }
+        slidesSubsystem.turnOffSpinny();
+        drive.followTrajectory(basketLineup);
+        timer.reset();
+        while(opModeIsActive() && timer.seconds() < 2){
+            slidesSubsystem.update();
+        }
+        drive.followTrajectory(deliver);
+        timer.reset();
+        while(opModeIsActive() && timer.seconds() < 6){
+            slidesSubsystem.update();
+        }
+        drive.followTrajectory(pickTwo);
+        drive.followTrajectory(basketLineup);
+        drive.followTrajectory(deliver);
+
+
+
 
         // Continuous update for SlidesSubsystem
         while (opModeIsActive() && !isStopRequested()) {
@@ -78,8 +134,5 @@ public class NetZoneAuto extends LinearOpMode {
 
         }
 
-
     }
 }
-
-

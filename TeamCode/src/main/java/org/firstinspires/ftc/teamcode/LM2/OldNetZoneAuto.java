@@ -3,10 +3,11 @@ import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.teamcode.RoadRunner.drive.SampleMecanumDrive;
-
+@Disabled
 @Autonomous
 @Config
 public class OldNetZoneAuto extends LinearOpMode {
@@ -25,7 +26,7 @@ public class OldNetZoneAuto extends LinearOpMode {
         Trajectory toBasket = drive.trajectoryBuilder(new Pose2d(38, 64, 0))
                 .lineToSplineHeading(new Pose2d(52, 48, Math.toRadians(45)))
                 .addTemporalMarker(0.1, () -> {
-                    slidesSubsystem.setSlidesJointPos(200);
+                    slidesSubsystem.setSlidesJointPos(2000,2);
                     slidesSubsystem.update();
 
                 })
@@ -40,10 +41,10 @@ public class OldNetZoneAuto extends LinearOpMode {
         Trajectory deliverOne = drive.trajectoryBuilder(toBasket.end())
                 .forward(7)
                 .addTemporalMarker(10, () -> {
-                    slidesSubsystem.wheelsDeliver();
+                    slidesSubsystem.spinnyDeliver();
                 })
                 .addTemporalMarker(14, () -> {
-                    slidesSubsystem.turnOffWheels();
+                    slidesSubsystem.turnOffSpinny();
                 })
                 .build();
 
@@ -62,9 +63,5 @@ public class OldNetZoneAuto extends LinearOpMode {
 
         }
 
-
-
-        }
     }
-
-
+}

@@ -20,9 +20,8 @@ public class SlidesSubsystem {
     private CRServo spinnyWheels;
     private Servo joint;
 
-    public static double  spinnyWheelsTargetPower = 0;
 
-    public static double speedDivider = 2;
+    public static double speedDivider = 3;
 
     //slide hard stops
     public static int maxSlidePos = 4800;
@@ -79,8 +78,10 @@ public class SlidesSubsystem {
         joint.setPosition(jointPos);
     }
 
-    public void setSlidesJointPos(double targetPos) {
+    public void setSlidesJointPos(double targetPos, int speedDiv) {
         setpoint = targetPos;
+        speedDivider = speedDiv;
+
     }
 
     public void setSlides(int targetPos) {
@@ -93,22 +94,21 @@ public class SlidesSubsystem {
         }
 
         slides.setTargetPosition(targetPos);
-        slides.setPower(0.25);
+        slides.setPower(0.75);
     }
 
-    public void wheelsIntake(){
-        spinnyWheelsTargetPower = -0.5;
+    public void spinnyIntake(){
+        spinnyWheels.setPower(-0.5);
 
     }
-    public void wheelsDeliver() {
-        spinnyWheelsTargetPower = 0.5;
+    public void spinnyDeliver() {
+        spinnyWheels.setPower(0.25);
 
     }
 
-    public void turnOffWheels(){
-        spinnyWheelsTargetPower = 0;
+    public void turnOffSpinny(){
+        spinnyWheels.setPower(0);
     }
-
 
     public void update() {
         double currentPosition = slidesJoint.getCurrentPosition();
@@ -129,18 +129,6 @@ public class SlidesSubsystem {
 
         lastError = error;
 
-        spinnyWheels.setPower(spinnyWheelsTargetPower);
     }
 
 }
-
-
-
-
-
-
-
-
-
-
-
