@@ -32,11 +32,12 @@ public class TeleOp11_10 extends LinearOpMode {
     boolean isDelivering = false;
     boolean previousBState = false;
 
-    public static double speedDivider = 8;
-    public static double jointPos = 0.3;
+    public static double speedDivider = 2;
+    public static double jointPosSpecimenPickUp = 0.5;
+    public static double jointBucketMore = 0.6;
 
     //slide hard stops
-    public static int maxSlidePos = 4800;
+    public static int maxSlidePos = 5000;
     public static int minSlidePos = 0;
 
     // PID coefficients
@@ -55,10 +56,11 @@ public class TeleOp11_10 extends LinearOpMode {
     private long lastTime;
 
     // Predefined positions for the arm
-    public static int armInitPos = 0;
-    public static int armIntakePos = 735;
-    public static int armDeliverPos = 460;
-    public static int armDriveAroundPos = 170;
+    public static int armInitPos = 2;
+    public static int armIntakePos = 675;
+    public static int armBasketPos = 2200;
+    public static int armChamberPos = 1670;
+    public static int maxSlideJointPos = 3300;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -100,9 +102,7 @@ public class TeleOp11_10 extends LinearOpMode {
 
             double driveLeft = gamepad1.left_stick_y*0.75;
             double driveRight = gamepad1.right_stick_y*0.75;
-            double strafe = gamepad1.right_stick_x/2;
-
-
+            //double strafe = gamepad1.right_stick_x/2;
 
             //driving controls
             frontLeft.setPower(driveLeft);
@@ -123,8 +123,10 @@ public class TeleOp11_10 extends LinearOpMode {
             }
 
             if (gamepad2.x){
-                joint.setPosition(jointPos);}
+                joint.setPosition(jointPosSpecimenPickUp);}
 
+            if (gamepad2.y){
+                joint.setPosition(jointBucketMore);}
 
             slidesTargetPos += (int)(-gamepad2.left_stick_y * 50);
 
@@ -139,35 +141,50 @@ public class TeleOp11_10 extends LinearOpMode {
             slides.setPower(0.5);
 
             // Read joystick input (assuming right stick Y-axis controls the motor position)
-            double joystickInput = gamepad2.right_stick_y;
+            double joystickInput = -gamepad2.right_stick_y;
 
             // Check for button presses to set predefined positions
             if (gamepad2.dpad_right) {       //set arm & joint to init position
-                //joint.setPosition(0.1);
+                joint.setPosition(0.125);
                 setpoint = armInitPos;
                 pidEnabled = true;
-
+                slidesTargetPos = 0;
             } else if (gamepad2.dpad_down) {    //set arm and joint position for intaking
-                //joint.setPosition();
                 setpoint = armIntakePos;
-                //joint.setPosition(0.15);
+                joint.setPosition(0.7);
+                slidesTargetPos = 0;
                 pidEnabled = true;
-            } else if (gamepad2.dpad_up) {    //arm and joint position for delivery
-                setpoint = armDeliverPos;
-                //joint.setPosition(0.4);
+            } else if (gamepad2.dpad_up) {    //arm and joint position for high basket
+                setpoint = armBasketPos;
+                joint.setPosition(0.7);
                 pidEnabled = true;
-            } else if (gamepad2.dpad_left){   //driving around position
-                setpoint = armDriveAroundPos;
-               //joint.setPosition(0.8);
+                slidesTargetPos = 5000;
+            } else if (gamepad2.dpad_left){   //arm and joint pos for high chamber
+                setpoint = armChamberPos;
+                slidesTargetPos = 500;
+                joint.setPosition(0.625);
                 pidEnabled = true;
             }
+
+            if(setpoint > maxSlideJointPos){
+                setpoint = maxSlideJointPos;
+            }
+
+            if (gamepad2.left_trigger > 0){
+                slidesJoint.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                setpoint = 0;
+                slidesJoint.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            }
+            if (gamepad2.right_trigger > 0){
+                joint.setPosition(0.3);
+            }
+
 
             // Check if joystick is being moved
             if (Math.abs(joystickInput) > 0.05) {  // Threshold to avoid noise
                 // Disable PID control and allow manual control
                 pidEnabled = false;
                 slidesJoint.setPower(joystickInput / speedDivider);
-
 
             } else if (!pidEnabled) {
                 //joystick has been released
@@ -220,8 +237,7 @@ public class TeleOp11_10 extends LinearOpMode {
             telemetry.addData("Joint Position", joint.getPosition());
             telemetry.update();
 
-
-            // Toggle spinning wheels for intaking when 'A' button is pressed
+            // Toggle spinning wheels for DELIVERING when 'A' button is pressed
             boolean currentAState = gamepad2.a;
             if (currentAState && !previousAState) {
                 // Toggle the spinning state
@@ -229,15 +245,15 @@ public class TeleOp11_10 extends LinearOpMode {
 
                 // If spinning, set servo speed
                 if (isIntaking) {
-                    spinnyWheels.setPower(0.5);
-                } else {       // If not intaking, stop the servo
+                    spinnyWheels.setPower(0.2);
+                } else {       // If not DELIVERING, stop the servo
                     spinnyWheels.setPower(0);
                 }
             }
             // Update the previous state of the 'A' button
             previousAState = currentAState;
 
-
+            //INTAKE
             boolean currentBState = gamepad2.b;
             if (currentBState && !previousBState) {
                 // Toggle the spinning state
@@ -246,7 +262,7 @@ public class TeleOp11_10 extends LinearOpMode {
                 // If spinning, set servo speed
                 if (isDelivering) {
                     spinnyWheels.setPower(-0.5);
-                } else {       // If done delivering, stop the servo
+                } else {       // If done INTAKING, stop the servo
                     spinnyWheels.setPower(0);
                 }
             }

@@ -56,10 +56,14 @@ public class SlidesSubsystem {
         slides = hardwareMap.get(DcMotorEx.class, "slides");
 
         slidesJoint.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        slidesJoint.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        //slidesJoint.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         slidesJoint.setDirection(DcMotorSimple.Direction.REVERSE);
         slides.setDirection(DcMotorSimple.Direction.REVERSE);
         slides.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+        int slidesJointTarget = 0;
+        slidesJoint.setTargetPosition(slidesJointTarget);
+        slidesJoint.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
 
         int slidesTargetPos = 0;
@@ -78,6 +82,14 @@ public class SlidesSubsystem {
         joint.setPosition(jointPos);
     }
 
+
+    public void runArmToPos(int targetPos, double speed){
+        slidesJoint.setTargetPosition(targetPos);
+        slidesJoint.setPower(speed);
+
+    }
+
+
     public void setSlidesJointPos(double targetPos, int speedDiv) {
         setpoint = targetPos;
         speedDivider = speedDiv;
@@ -94,7 +106,7 @@ public class SlidesSubsystem {
         }
 
         slides.setTargetPosition(targetPos);
-        slides.setPower(0.75);
+        slides.setPower(1);
     }
 
     public void spinnyIntake(){
