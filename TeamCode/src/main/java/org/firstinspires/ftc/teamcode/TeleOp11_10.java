@@ -128,7 +128,7 @@ public class TeleOp11_10 extends LinearOpMode {
             if (gamepad2.y){
                 joint.setPosition(jointBucketMore);}
 
-            slidesTargetPos += (int)(-gamepad2.left_stick_y * 50);
+            slidesTargetPos += (int)(-gamepad2.left_stick_y * 30);
 
             if (slidesTargetPos > maxSlidePos) {
                 slidesTargetPos = maxSlidePos;
@@ -138,7 +138,7 @@ public class TeleOp11_10 extends LinearOpMode {
             }
 
             slides.setTargetPosition(slidesTargetPos);
-            slides.setPower(0.5);
+            slides.setPower(0.75);
 
             // Read joystick input (assuming right stick Y-axis controls the motor position)
             double joystickInput = -gamepad2.right_stick_y;
