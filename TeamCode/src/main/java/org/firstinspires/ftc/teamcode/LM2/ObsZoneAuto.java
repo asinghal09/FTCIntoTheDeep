@@ -37,7 +37,7 @@ public class ObsZoneAuto extends LinearOpMode {
                 .build();
 
         Trajectory deliverOne = drive.trajectoryBuilder(toSubmersible.end())    //drives up to submersible
-                .forward(12)
+                .forward(11.5)
                 //.addTemporalMarker(6.75, ()->{
                     //slidesSubsystem.setSlidesJointPos(1000,6); //brings down arm to push onto chamber
                 //})
@@ -46,7 +46,7 @@ public class ObsZoneAuto extends LinearOpMode {
                 .back(10)
                 .addTemporalMarker(11, ()->{
                     slidesSubsystem.setJointPos(0.5);                           //intake pos specimen
-                    slidesSubsystem.runArmToPos(600,1);
+                    slidesSubsystem.runArmToPos(550,1);
                     //slidesSubsystem.setSlidesJointPos(335,4);
                     slidesSubsystem.setSlides(0);
                 })
@@ -69,7 +69,7 @@ public class ObsZoneAuto extends LinearOpMode {
                 .splineToLinearHeading(new Pose2d(-6,49,Math.toRadians(271)), Math.toRadians(180))
                 .build();
         Trajectory forward = drive.trajectoryBuilder(splineToSub.end())
-                .forward(11)
+                .forward(11.5)
                 .build();
         Trajectory backUp2 = drive.trajectoryBuilder(forward.end())
                 .back(10)
@@ -132,7 +132,7 @@ public class ObsZoneAuto extends LinearOpMode {
         while(opModeIsActive() && timer.seconds() < 0.5){
             slidesSubsystem.update();
         }
-        slidesSubsystem.runArmToPos(1200,0.4);
+        slidesSubsystem.runArmToPos(1000,0.4);
         timer.reset();
         while(opModeIsActive() && timer.seconds() < 1){
             slidesSubsystem.update();

@@ -36,7 +36,7 @@ public class NetZoneAuto extends LinearOpMode {
                 .build();
 
         Trajectory deliverOne = drive.trajectoryBuilder(toSubmersible.end())    //drives up to submersible
-                .forward(12)
+                .forward(11.5)
                 //.addTemporalMarker(6.75, ()->{
                     //slidesSubsystem.setSlidesJointPos(1000,6); //brings down arm to push onto chamber
                 //})
@@ -72,7 +72,7 @@ public class NetZoneAuto extends LinearOpMode {
                 })
                 .build();
         Trajectory deliver = drive.trajectoryBuilder(basketLineup.end())
-                .forward(12)
+                .forward(12.5)
                 //.addTemporalMarker(16, () -> {
                   //  slidesSubsystem.spinnyDeliver();
                 //})
@@ -118,10 +118,10 @@ public class NetZoneAuto extends LinearOpMode {
         while(opModeIsActive() && timer.seconds() < 0.5){
             slidesSubsystem.update();
         }
-        slidesSubsystem.runArmToPos(1200,0.4);
+        slidesSubsystem.runArmToPos(1000,0.4);
         //slidesSubsystem.setSlidesJointPos(1000,6);
         timer.reset();
-        while(opModeIsActive() && timer.seconds() < 0.5){
+        while(opModeIsActive() && timer.seconds() < 0.75){
             slidesSubsystem.update();
         }
         slidesSubsystem.spinnyDeliver();
@@ -132,7 +132,7 @@ public class NetZoneAuto extends LinearOpMode {
         //while(opModeIsActive() && timer.seconds() < 0.25){
             //slidesSubsystem.update();
         //}
-        slidesSubsystem.runArmToPos(350,0.5);
+        slidesSubsystem.runArmToPos(305,0.5);
 
         timer.reset();
         while(opModeIsActive() && timer.seconds() < 0.75){
@@ -182,7 +182,7 @@ public class NetZoneAuto extends LinearOpMode {
         }
 
  */
-        slidesSubsystem.runArmToPos(350,0.5);
+        slidesSubsystem.runArmToPos(305,0.5);
         timer.reset();
         while(opModeIsActive() && timer.seconds() < 0.75){
             slidesSubsystem.update();
@@ -212,7 +212,7 @@ public class NetZoneAuto extends LinearOpMode {
         slidesSubsystem.setSlides(0);
 
         timer.reset();
-        while(opModeIsActive() && timer.seconds() < 0.5){
+        while(opModeIsActive() && timer.seconds() < 0.75){
             slidesSubsystem.update();
         }
         slidesSubsystem.runArmToPos(0,1);

@@ -38,7 +38,7 @@ public class TeleOp11_10 extends LinearOpMode {
 
     //slide hard stops
     public static int maxSlidePos = 5000;
-    public static int minSlidePos = 0;
+    public static int minSlidePos = 500;
 
     // PID coefficients
     public static double Kp = 0.019;   // Proportional Gain
@@ -60,7 +60,7 @@ public class TeleOp11_10 extends LinearOpMode {
     public static int armIntakePos = 675;
     public static int armBasketPos = 2200;
     public static int armChamberPos = 1670;
-    public static int maxSlideJointPos = 3300;
+    public static int maxSlideJointPos = 2400;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -132,11 +132,17 @@ public class TeleOp11_10 extends LinearOpMode {
 
             if (slidesTargetPos > maxSlidePos) {
                 slidesTargetPos = maxSlidePos;
-
-            }else if (slidesTargetPos < minSlidePos) {
-                slidesTargetPos = minSlidePos;
+            } else if (setpoint>0 && setpoint < 1000){
+                if (slidesTargetPos > minSlidePos){
+                    slidesTargetPos = minSlidePos;
+                }
             }
+            if (setpoint > 2350) {
+                if (slidesTargetPos > 4000){
+                    slidesTargetPos = 4000;
+                }
 
+            }
             slides.setTargetPosition(slidesTargetPos);
             slides.setPower(0.75);
 
@@ -151,7 +157,7 @@ public class TeleOp11_10 extends LinearOpMode {
                 slidesTargetPos = 0;
             } else if (gamepad2.dpad_down) {    //set arm and joint position for intaking
                 setpoint = armIntakePos;
-                joint.setPosition(0.7);
+                joint.setPosition(0.73);
                 slidesTargetPos = 0;
                 pidEnabled = true;
             } else if (gamepad2.dpad_up) {    //arm and joint position for high basket
@@ -166,7 +172,8 @@ public class TeleOp11_10 extends LinearOpMode {
                 pidEnabled = true;
             }
 
-            if(setpoint > maxSlideJointPos){
+            if(slidesJoint.getCurrentPosition() > maxSlideJointPos){
+                pidEnabled = true;
                 setpoint = maxSlideJointPos;
             }
 
@@ -174,6 +181,11 @@ public class TeleOp11_10 extends LinearOpMode {
                 slidesJoint.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                 setpoint = 0;
                 slidesJoint.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+                slides.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                slidesTargetPos = 0;
+                slides.setTargetPosition(slidesTargetPos);
+                slides.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             }
             if (gamepad2.right_trigger > 0){
                 joint.setPosition(0.3);
