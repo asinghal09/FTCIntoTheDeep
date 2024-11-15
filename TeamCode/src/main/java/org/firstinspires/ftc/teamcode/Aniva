@@ -1,83 +1,48 @@
-package org.firstinspires.ftc.teamcode;
+// Define power level and timing values
+double movePower = 0.5;  // Adjust as needed for your robot's speed
+int timePerFoot = 1000;  // Adjust this value based on how long it takes to move 1 foot
+int turnTime = 500;      // Adjust this based on the time needed to make a 90-degree turn
 
-import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+// Function to move straight
+void moveStraight(double power, int time) throws InterruptedException {
+    backLeft.setPower(power);
+    frontLeft.setPower(power);
+    backRight.setPower(power);
+    frontRight.setPower(power);
 
-/* Defines as an autonomous OpMode with name
-OpmMode is something that runs under specific conditions
- */
-@Autonomous(name = "TestAuto")
-public class Test_Aniva extends LinearOpMode {
+    Thread.sleep(time);
 
-    // defines motors for each wheel
-    private DcMotor backLeft;
-    private DcMotor backRight;
-    private DcMotor frontLeft;
-    private DcMotor frontRight;
+    // Stop the motors after moving
+    backLeft.setPower(0);
+    frontLeft.setPower(0);
+    backRight.setPower(0);
+    frontRight.setPower(0);
+}
 
-    // Position counters to track target encoder positions
-    private int backLeftPos;
-    private int backRightPos;
-    private int frontLeftPos;
-    private int frontRightPos;
+// Function to turn 90 degrees CounterClockwise
+void turn90DegreesCounterClockwise(double power, int time) throws InterruptedException {
+    backLeft.setPower(-power);
+    frontLeft.setPower(-power);
+    backRight.setPower(power);
+    frontRight.setPower(power);
 
-    @Override
-    public void runOpMode() {
-        // initialize motors by mapping them to names in the configuration file
-        backLeft = hardwareMap.get(DcMotor.class, "backLeftMotor");
-        backRight = hardwareMap.get(DcMotor.class, "backRightMotor");
-        frontRight = hardwareMap.get(DcMotor.class, "frontRightMotor");
-        frontLeft = hardwareMap.get(DcMotor.class, "frontLeftMotor");
+    Thread.sleep(time);
 
-        // Reset encoders to zero for accurate tracking
-        backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        backRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        frontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        frontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+    // Stop the motors after turning
+    backLeft.setPower(0);
+    frontLeft.setPower(0);
+    backRight.setPower(0);
+    frontRight.setPower(0);
+}
 
-        //Set directions for right-side motors to move in reverse, adjusting for physical orientation
-        backRight.setDirection(DcMotorSimple.Direction.REVERSE);
-        frontRight.setDirection(DcMotorSimple.Direction.REVERSE);
+// Main sequence
+void mainSequence() throws InterruptedException {
+    // Move straight for 1 foot
+    moveStraight(movePower, timePerFoot);
 
-        //Initialize encoder position counters to zero
-        backLeftPos = 0;
-        backRightPos = 0;
-        frontRightPos = 0;
-        frontLeftPos = 0;
+    // Perform a 90-degree clockwise turn
+    turn90DegreesClockwise(movePower, turnTime);
 
-        //Wait for start button to begin
-        waitForStart();
-
-
-        drive(1000,1000, 1000, 1000, 0.25);
-        drive(1000,-1000, 1000, -1000, 0.25);
-    }
-
-    private void drive(double backLeftTarget, double backRightTarget, double frontLeftTarget, double frontRightTarget, double speed) {
-        backLeftPos += backLeftTarget;
-        backRightPos += backRightTarget;
-        frontLeftPos += frontLeftTarget;
-        frontRightPos += frontRightTarget;
-
-        backLeft.setTargetPosition(backLeftPos);
-        backRight.setTargetPosition(backRightPos);
-        frontLeft.setTargetPosition(frontLeftPos);
-        frontRight.setTargetPosition(frontRightPos);
-
-        backLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        backRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        frontLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        frontRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-
-        backLeft.setPower(speed);
-        backRight.setPower(speed);
-        frontLeft.setPower(speed);
-        frontRight.setPower(speed);
-
-        while (opModeIsActive() && backLeft.isBusy() && backRight.isBusy() && frontLeft.isBusy() && frontRight.isBusy()) {
-            idle();
-        }
-    }
+    // Move straight for 2 feet
+    moveStraight(movePower, 2 * timePerFoot);
 }
