@@ -40,7 +40,7 @@ void mainSequence() throws InterruptedException {
     // Move straight for 1 foot
     moveStraight(movePower, timePerFoot);
 
-    // Perform a 90-degree clockwise turn
+    // 90-degree clockwise turn
     turn90DegreesClockwise(movePower, turnTime);
 
     // Move straight for 2 feet
