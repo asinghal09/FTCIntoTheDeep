@@ -1,9 +1,9 @@
-// Define power level and timing values
-double movePower = 0.5;  // Adjust as needed for your robot's speed
-int timePerFoot = 1000;  // Adjust this value based on how long it takes to move 1 foot
-int turnTime = 500;      // Adjust this based on the time needed to make a 90-degree turn
+// Power level and timing values
+double movePower = 0.5;  // Robot's speed
+int timePerFoot = 1000;  // How long it takes to move 1 foot
+int turnTime = 500;      // 90-degree turn
 
-// Function to move straight
+// Move straight
 void moveStraight(double power, int time) throws InterruptedException {
     backLeft.setPower(power);
     frontLeft.setPower(power);
@@ -19,7 +19,7 @@ void moveStraight(double power, int time) throws InterruptedException {
     frontRight.setPower(0);
 }
 
-// Function to turn 90 degrees CounterClockwise
+// Turn 90 degrees CounterClockwise
 void turn90DegreesCounterClockwise(double power, int time) throws InterruptedException {
     backLeft.setPower(-power);
     frontLeft.setPower(-power);
