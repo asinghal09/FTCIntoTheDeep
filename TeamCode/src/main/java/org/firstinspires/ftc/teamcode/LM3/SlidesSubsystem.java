@@ -1,14 +1,12 @@
-package org.firstinspires.ftc.teamcode.LM2;
-import com.acmerobotics.dashboard.config.Config;
+package org.firstinspires.ftc.teamcode.LM3;
 
-import com.qualcomm.robotcore.hardware.CRServo;
+import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.config.Config;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.acmerobotics.dashboard.FtcDashboard;
-import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
@@ -17,8 +15,7 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 public class SlidesSubsystem {
 
     private DcMotorEx slidesJoint, slides;
-    private CRServo spinnyWheels;
-    private Servo joint;
+    private Servo claw;
 
 
     public static double speedDivider = 3;
@@ -50,8 +47,7 @@ public class SlidesSubsystem {
 
     public SlidesSubsystem(HardwareMap hardwareMap, Telemetry telemetry) {
 
-        spinnyWheels = hardwareMap.get(CRServo.class, "spinnyWheels");
-        joint = hardwareMap.get(Servo.class, "joint");
+        claw = hardwareMap.get(Servo.class, "claw");
         slidesJoint = hardwareMap.get(DcMotorEx.class, "slidesJoint");
         slides = hardwareMap.get(DcMotorEx.class, "slides");
 
@@ -76,10 +72,6 @@ public class SlidesSubsystem {
 
         lastTime = System.currentTimeMillis();
 
-    }
-
-    public void setJointPos(double jointPos) {
-        joint.setPosition(jointPos);
     }
 
 
@@ -109,17 +101,13 @@ public class SlidesSubsystem {
         slides.setPower(1);
     }
 
-    public void spinnyIntake(){
-        spinnyWheels.setPower(-0.5);
+    public void clawOpen(){
+        claw.setPosition(0.6);
 
     }
-    public void spinnyDeliver() {
-        spinnyWheels.setPower(0.25);
+    public void clawClose() {
+        claw.setPosition(0.3);
 
-    }
-
-    public void turnOffSpinny(){
-        spinnyWheels.setPower(0);
     }
 
     public void update() {

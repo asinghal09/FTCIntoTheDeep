@@ -17,7 +17,7 @@ public class OldNetZoneAuto extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
-        SlidesSubsystem slidesSubsystem = new SlidesSubsystem(hardwareMap, telemetry);
+        LM2SlidesSubsystem slidesSubsystem = new LM2SlidesSubsystem(hardwareMap, telemetry);
 
         drive.setPoseEstimate(new Pose2d(38, 64, 0));
 
