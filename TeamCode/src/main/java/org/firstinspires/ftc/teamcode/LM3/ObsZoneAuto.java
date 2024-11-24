@@ -22,43 +22,30 @@ public class ObsZoneAuto extends LinearOpMode {
         SlidesSubsystem slidesSubsystem = new SlidesSubsystem(hardwareMap, telemetry);
 
         drive.setPoseEstimate(new Pose2d(-8, 64, Math.toRadians(270)));
-        /*
+
 
 
         Trajectory toSubmersible = drive.trajectoryBuilder(new Pose2d(-8, 64, Math.toRadians(270)))
                 .forward(15)                //brings robot to the submersible for 1st specimen
                 .addTemporalMarker(0.1, () -> {
-                    slidesSubsystem.runArmToPos(1650,0.75);
+                    slidesSubsystem.runArmToPos(900,1);
                     //slidesSubsystem.setSlidesJointPos(1650,2);
 
                 })
                 .addTemporalMarker(0.25, () -> {
-                    slidesSubsystem.setSlides(500);
-                    slidesSubsystem.setJointPos(0.625);
+                    slidesSubsystem.setSlides(1650);
                 })
 
                 .build();
 
         Trajectory deliverOne = drive.trajectoryBuilder(toSubmersible.end())    //drives up to submersible
                 .forward(11.5)
-                //.addTemporalMarker(6.75, ()->{
-                    //slidesSubsystem.setSlidesJointPos(1000,6); //brings down arm to push onto chamber
-                //})
                 .build();
         Trajectory backUp = drive.trajectoryBuilder(deliverOne.end())       //backs up from sub after delivering
-                .back(10)
-                .addTemporalMarker(11, ()->{
-                    slidesSubsystem.setJointPos(0.5);                           //intake pos specimen
-                    slidesSubsystem.runArmToPos(550,1);
-                    //slidesSubsystem.setSlidesJointPos(335,4);
-                    slidesSubsystem.setSlides(0);
-                })
+                .back(5)
                 .build();
         Trajectory splineToObs = drive.trajectoryBuilder(backUp.end())         //strafes to pick up 1st sample
-                .splineToLinearHeading(new Pose2d(-46.5,53,Math.toRadians(90)), Math.toRadians(180))
-                .addSpatialMarker(new Vector2d(-46, 53), () -> {
-                    slidesSubsystem.spinnyIntake();
-                })
+                .splineToLinearHeading(new Pose2d(-48,48,Math.toRadians(90)), Math.toRadians(180))
                 .build();
         Trajectory pickOne = drive.trajectoryBuilder(splineToObs.end())
                 .forward(2)
@@ -75,12 +62,16 @@ public class ObsZoneAuto extends LinearOpMode {
                 .forward(11.5)
                 .build();
         Trajectory backUp2 = drive.trajectoryBuilder(forward.end())
-                .back(10)
+                .back(5)
                 .build();
 
-        Trajectory push = drive.trajectoryBuilder(backUp2.end())
+        Trajectory backFromSub2 = drive.trajectoryBuilder(backUp2.end())
+                .back(5)
+                .build();
+
+        Trajectory push = drive.trajectoryBuilder(backFromSub2.end())
                 .strafeRight(14)
-                .splineToSplineHeading(new Pose2d(-39,12,Math.toRadians(0)),Math.toRadians(270))
+                .splineToSplineHeading(new Pose2d(-37,12,Math.toRadians(0)),Math.toRadians(270))
                 .build();
         Trajectory backPush = drive.trajectoryBuilder(push.end())
                 .back(9.5)
@@ -89,66 +80,100 @@ public class ObsZoneAuto extends LinearOpMode {
                 .strafeLeft(48)
                 .build();
 
+        Trajectory strafeRightTo2ndGround = drive.trajectoryBuilder(strafe.end())
+                .strafeRight(48)
+                .build();
+        Trajectory backToStafe = drive.trajectoryBuilder(strafeRightTo2ndGround.end())
+                .back(8)
+                .build();
+        Trajectory strafeToObs2 = drive.trajectoryBuilder(backToStafe.end())
+                .strafeLeft(48)
+                .build();
 
 
 
         //init
-        slidesSubsystem.setJointPos(0.125);
+        slidesSubsystem.clawClose();
 
         waitForStart();
-
-        //beginning of auto
         drive.followTrajectory(toSubmersible);
 
         ElapsedTime timer = new ElapsedTime();
-        while(opModeIsActive() && timer.seconds() < 0.75){
+        while(opModeIsActive() && timer.seconds() < 0.2){
             slidesSubsystem.update();
         }
         drive.followTrajectory(deliverOne);
         timer.reset();
+        while(opModeIsActive() && timer.seconds() < 0.3){
+            slidesSubsystem.update();
+        }
+        slidesSubsystem.runArmToPos(1250,1);
+
+        timer.reset();
         while(opModeIsActive() && timer.seconds() < 0.5){
             slidesSubsystem.update();
         }
-        slidesSubsystem.runArmToPos(1200,0.4);
-        //slidesSubsystem.setSlidesJointPos(1000,6);
+
+        drive.followTrajectory(backUp);
         timer.reset();
-        while(opModeIsActive() && timer.seconds() < 1){
+        while(opModeIsActive() && timer.seconds() < 0.1){
             slidesSubsystem.update();
         }
-        slidesSubsystem.spinnyDeliver();
-        drive.followTrajectory(backUp);
-        slidesSubsystem.turnOffSpinny();
+        slidesSubsystem.clawOpen();
+        slidesSubsystem.setSlides(1500);
+
+        while(opModeIsActive() && timer.seconds() < 0.5){
+            slidesSubsystem.update();
+        }
+
+        slidesSubsystem.runArmToPos(0,0.75);
+        slidesSubsystem.setSlides(50);
         drive.followTrajectory(splineToObs);
+        timer.reset();
+        while(opModeIsActive() && timer.seconds() < 0.75){
+            slidesSubsystem.update();
+        }
         drive.followTrajectory(pickOne);
         timer.reset();
-        while(opModeIsActive() && timer.seconds() < 0.2){
+        while(opModeIsActive() && timer.seconds() < 0.4){
             slidesSubsystem.update();
         }
-        slidesSubsystem.turnOffSpinny();
-        slidesSubsystem.runArmToPos(1650,1);
-        slidesSubsystem.setJointPos(0.625);
-        slidesSubsystem.setSlides(500);
+
+        slidesSubsystem.clawClose();
+        timer.reset();
+        while(opModeIsActive() && timer.seconds() < 0.1){
+            slidesSubsystem.update();
+        }
+        slidesSubsystem.runArmToPos(900,1);
+
+        slidesSubsystem.setSlides(1650);
         drive.followTrajectory(backUpFromPerimeter);
         drive.followTrajectory(splineToSub);
+
         drive.followTrajectory(forward);
         timer.reset();
         while(opModeIsActive() && timer.seconds() < 0.5){
             slidesSubsystem.update();
         }
-        slidesSubsystem.runArmToPos(1000,0.4);
+        slidesSubsystem.runArmToPos(1250,1);
         timer.reset();
-        while(opModeIsActive() && timer.seconds() < 1){
+        while(opModeIsActive() && timer.seconds() < 0.5){
             slidesSubsystem.update();
         }
-        slidesSubsystem.spinnyDeliver();
         drive.followTrajectory(backUp2);
-        slidesSubsystem.turnOffSpinny();
-        slidesSubsystem.runArmToPos(0,1);
+        timer.reset();
+        while(opModeIsActive() && timer.seconds() < 0.1){
+            slidesSubsystem.update();
+        }
+        slidesSubsystem.clawOpen();
+        drive.followTrajectory(backFromSub2);
         slidesSubsystem.setSlides(0);
-        slidesSubsystem.setJointPos(0.15);
+        slidesSubsystem.runArmToPos(0,0.75);
         drive.followTrajectory(push);
         drive.followTrajectory(backPush);
         drive.followTrajectory(strafe);
+        drive.followTrajectory(strafeRightTo2ndGround);
+        drive.followTrajectory(strafeToObs2);
 
 
         // Continuous update for SlidesSubsystem
@@ -158,8 +183,5 @@ public class ObsZoneAuto extends LinearOpMode {
             telemetry.update();
 
         }
-
-
-         */
     }
 }
