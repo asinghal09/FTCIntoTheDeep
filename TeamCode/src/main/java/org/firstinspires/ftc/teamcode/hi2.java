@@ -32,18 +32,17 @@ public class hi2 extends LinearOpMode {
     @Override
     public void runOpMode() {
         // Initialize hardware
-        armMotor = hardwareMap.get(DcMotorEx.class, "armMotor");
-        leftFront = hardwareMap.get(DcMotor.class, "leftFront");
-        leftRear = hardwareMap.get(DcMotor.class, "leftRear");
-        rightFront = hardwareMap.get(DcMotor.class, "rightFront");
-        rightRear = hardwareMap.get(DcMotor.class, "rightRear");
+        armMotor = hardwareMap.get(DcMotorEx.class, "slidesJoint");
+        leftFront = hardwareMap.get(DcMotor.class, "frontLeft");
+        leftRear = hardwareMap.get(DcMotor.class, "backLeft");
+        rightFront = hardwareMap.get(DcMotor.class, "frontRight");
+        rightRear = hardwareMap.get(DcMotor.class, "backRight");
 
         // Set motor directions
-        armMotor.setDirection(DcMotorEx.Direction.FORWARD);
-        leftFront.setDirection(DcMotor.Direction.FORWARD);
+
         leftRear.setDirection(DcMotor.Direction.REVERSE);
-        rightFront.setDirection(DcMotor.Direction.FORWARD);
-        rightRear.setDirection(DcMotor.Direction.REVERSE);
+
+        leftFront.setDirection(DcMotor.Direction.REVERSE);
 
         // Set up PID for arm motor
         armMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
