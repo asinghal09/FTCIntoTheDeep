@@ -12,7 +12,7 @@ public class StringAscentTesting extends LinearOpMode {
 
         waitForStart();
         while (opModeIsActive()){
-            ascent.setPower(1);
+            ascent.setPower(gamepad1.left_stick_y);
 
         }
     }
