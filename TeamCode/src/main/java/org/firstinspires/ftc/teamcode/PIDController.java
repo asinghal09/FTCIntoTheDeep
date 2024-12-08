@@ -22,7 +22,7 @@ public class PIDController {
     }
 
     public void setSetpoint(double setpoint) {
-        this.setpoint = setpoint; // Only set the target
+        this.setpoint = setpoint; //only set the target
     }
     public double calculate(double currentValue) {
         double currentTime =System.currentTimeMillis();
