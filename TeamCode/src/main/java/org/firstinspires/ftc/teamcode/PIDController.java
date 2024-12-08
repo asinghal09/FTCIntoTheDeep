@@ -26,7 +26,7 @@ public class PIDController {
     }
     public double calculate(double currentValue) {
         double currentTime =System.currentTimeMillis();
-        double deltaTime = (currentTime - lastTime) / 1000.0; //seconds
+        double deltaTime = (currentTime - lastTime) / 1000.0; //measured in seconds
 
         double error = setpoint - currentValue;
         integral += error * deltaTime;
