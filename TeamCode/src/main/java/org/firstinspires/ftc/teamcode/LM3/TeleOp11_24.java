@@ -198,6 +198,8 @@ public class TeleOp11_24 extends LinearOpMode {
 
             if (slidesJointTargetPos > maxSlideJointPos) {
                 slidesJointTargetPos = maxSlideJointPos;
+            } else if (slidesJointTargetPos <=0){
+                slidesJointTargetPos = 0;
             }
             slidesJoint.setTargetPosition(slidesJointTargetPos);
             slidesJoint.setPower(0.5);

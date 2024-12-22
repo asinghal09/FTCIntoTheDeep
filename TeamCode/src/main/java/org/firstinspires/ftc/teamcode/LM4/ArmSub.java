@@ -1,8 +1,7 @@
-package org.firstinspires.ftc.teamcode.LM3;
+package org.firstinspires.ftc.teamcode.LM4;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
@@ -11,17 +10,15 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
-@Disabled
+
 @Config
-public class SlidesSubsystem {
+public class ArmSub {
 
     private DcMotorEx slidesJoint, slides;
     private Servo claw;
 
 
     public static double speedDivider = 3;
-
-    public static double clawClosePos = 0.3;
 
     //slide hard stops
     public static int maxSlidePos = 4800;
@@ -48,7 +45,7 @@ public class SlidesSubsystem {
     public static int armDeliverPos = 460;
     public static int armDriveAroundPos = 170;
 
-    public SlidesSubsystem(HardwareMap hardwareMap, Telemetry telemetry) {
+    public ArmSub(HardwareMap hardwareMap, Telemetry telemetry) {
 
         claw = hardwareMap.get(Servo.class, "claw");
         slidesJoint = hardwareMap.get(DcMotorEx.class, "slidesJoint");
@@ -109,7 +106,7 @@ public class SlidesSubsystem {
 
     }
     public void clawClose() {
-        claw.setPosition(clawClosePos);
+        claw.setPosition(0.29);
 
     }
 

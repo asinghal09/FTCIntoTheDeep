@@ -10,11 +10,7 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 
-@Disabled
-@Config
-@TeleOp
-
-public class SlidesTesting extends LinearOpMode {
+@Disabled class SlidesTesting extends LinearOpMode {
 
     DcMotor slides;
     DcMotorEx slidesJoint;

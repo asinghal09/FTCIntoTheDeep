@@ -11,6 +11,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.teamcode.LM2.LM2SlidesSubsystem;
 import org.firstinspires.ftc.teamcode.RoadRunner.drive.SampleMecanumDrive;
 
+@Disabled
 @Autonomous
 @Config
 public class ObsZoneAuto extends LinearOpMode {
@@ -107,7 +108,7 @@ public class ObsZoneAuto extends LinearOpMode {
         while(opModeIsActive() && timer.seconds() < 0.3){
             slidesSubsystem.update();
         }
-        slidesSubsystem.runArmToPos(1250,1);
+
 
         timer.reset();
         while(opModeIsActive() && timer.seconds() < 0.5){
