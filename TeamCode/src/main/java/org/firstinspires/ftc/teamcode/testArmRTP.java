@@ -11,7 +11,7 @@ import com.acmerobotics.dashboard.config.Config;
 @Autonomous
 @Config
 
-public class NormalWheelsDecMeetLinearNet extends LinearOpMode {
+public class testArmRTP extends LinearOpMode {
     DcMotor frontLeft;
     DcMotor frontRight;
     DcMotor backLeft;
@@ -136,47 +136,10 @@ public class NormalWheelsDecMeetLinearNet extends LinearOpMode {
         long timeThreshold = 7000;
         //bring slides up
         //drive forward to sub
-        drive(1300, 1300, 1300, 1300, 0.4);
-        //put specimen
-       // movearmBot(2000,0.5);
-       // movearmMid(1000, 0.5);
-      //  claw.setPosition(0.2);
-        //move backwards
-        drive(-300, -300, -300, -300, 0.4);
-        //turn left 90 degrees left
-        drive(-390, 390, 390, -390, 0.4);
-        //drive forward
-        drive(1702.8, 1702.8, 1702.8, 1702.8, 0.4);
-        //turn right
-        drive(400, -400, -400, 400, 0.4);
-        sleep(2000);
-        //pick sample
-        //turn left
-        drive(-601.6, 601.6, 601.6, -501.6, 0.4);
-        //drive forward
-        drive(400, 400, 400, 400, 0.4);
-        //drop sample
-        //drive back
-        drive(-500, -500, -500, -300, 0.4);
-        //turn right
-        drive(354, -354, -354, 354, 0.4);
-        sleep(1000);
-        //drive forward
-        drive(350, 350, 350, 350, 0.4);
-        sleep(1000);
-        //pick sample
-        //drive back
-        drive(-400, -400, -400, -400, 0.4);
-        sleep(1000);
-        //turn left
-        drive(-454, 454, 454, -454, 0.4);
-        sleep(1000);
-        //drive forward
-        drive(450, 450, 450, 450, 0.4);
-        //put sample in high basket
-        sleep(1000);
-        //drop sample
-        drive(-300, -300, -300, -300, 0.4);
+
+        movearmBot(500,0.5);
+        movearmMid(200, 0.5);
+        clawJoint.setPosition(0.2);
 
 
         // Check if the elapsed time has reached the threshold
@@ -209,49 +172,50 @@ public class NormalWheelsDecMeetLinearNet extends LinearOpMode {
             idle();
         }
     }
-        private void movearmBot( int position, double power){
-            armbotJoint.setTargetPosition(position);
-            armbotJoint.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+    private void movearmBot( int position, double power){
+        armbotJoint.setTargetPosition(position);
+        armbotJoint.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
 
-            armmidJoint.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-            armbotJoint.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-            armbotJoint.setPower(power);
+        armmidJoint.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        armbotJoint.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        armbotJoint.setPower(power);
 
-            while (armbotJoint.isBusy() && opModeIsActive()) {
-                telemetry.addData("armbotPosition", armbotJoint.getCurrentPosition());
-                telemetry.update();
-            }
-
-            armbotJoint.setPower(0);
-        }
-        private void movearmMid ( int position, double power){
-            armmidJoint.setTargetPosition(position);
-            armmidJoint.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
-
-            armmidJoint.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-            armbotJoint.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-
-            armmidJoint.setPower(power);
-
-            while (armmidJoint.isBusy() && opModeIsActive()) {
-                telemetry.addData("armmidPosition", armmidJoint.getCurrentPosition());
-                telemetry.update();
-            }
-
-            armmidJoint.setPower(0);
+        while (armbotJoint.isBusy() && opModeIsActive()) {
+            telemetry.addData("armbotPosition", armbotJoint.getCurrentPosition());
+            telemetry.update();
         }
 
-        private void armChamber () {
-            movearmBot(2000, 0.5);
-            movearmMid(1000, 0.5);
-            clawJoint.setPosition(0.4);
-        }
-        private void armBasket () {
-            movearmBot(3000, 0.5);
-            movearmMid(1000, 0.5);
-            clawJoint.setPosition(0.4);
-        }
+        armbotJoint.setPower(0);
     }
+    private void movearmMid ( int position, double power){
+        armmidJoint.setTargetPosition(position);
+        armmidJoint.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+
+        armmidJoint.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        armbotJoint.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+        armmidJoint.setPower(power);
+
+        while (armmidJoint.isBusy() && opModeIsActive()) {
+            telemetry.addData("armmidPosition", armmidJoint.getCurrentPosition());
+            telemetry.update();
+        }
+
+        armmidJoint.setPower(0);
+    }
+
+    private void armChamber () {
+        movearmBot(2000, 0.5);
+        movearmMid(1000, 0.5);
+        clawJoint.setPosition(0.4);
+    }
+    private void armBasket () {
+        movearmBot(3000, 0.5);
+        movearmMid(1000, 0.5);
+        clawJoint.setPosition(0.4);
+    }
+}
+
 
 
 
