@@ -1,8 +1,10 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 @com.qualcomm.robotcore.eventloop.opmode.TeleOp
 
@@ -15,10 +17,10 @@ public class TeleOp1 extends OpMode{
     @Override
     public void init() {
         //initialize
-        frontLeft = hardwareMap.get(DcMotor.class, "front_left");
-        frontRight = hardwareMap.get(DcMotor.class, "front_right");
-        backLeft = hardwareMap.get(DcMotor.class, "back_left");
-        backRight = hardwareMap.get(DcMotor.class, "back_right");
+        frontLeft = hardwareMap.get(DcMotor.class, "frontLeft");
+        frontRight = hardwareMap.get(DcMotor.class, "frontRight");
+        backLeft = hardwareMap.get(DcMotor.class, "backLeft");
+        backRight = hardwareMap.get(DcMotor.class, "backRight");
 
         //set direction
         frontRight.setDirection(DcMotor.Direction.REVERSE);
@@ -29,8 +31,8 @@ public class TeleOp1 extends OpMode{
 
     @Override
     public void loop() {
-        double drive = -gamepad1.left_stick_y; //forward and backward
-        double turn = gamepad1.right_stick_x; //turn right and left
+        double turn = gamepad1.left_stick_x; //forward and backward
+        double drive = -gamepad1.right_stick_y; //turn right and left
 
         //calculate power
         double frontLeftPower = drive + turn;
