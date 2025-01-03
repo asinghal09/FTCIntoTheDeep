@@ -18,6 +18,10 @@ public class ArmSub {
     private Servo claw;
 
 
+    public static double clawOpenPos = 0.5;
+    public static double clawClosePos = 0.26;
+
+
     public static double speedDivider = 3;
 
     //slide hard stops
@@ -102,11 +106,11 @@ public class ArmSub {
     }
 
     public void clawOpen(){
-        claw.setPosition(0.6);
+        claw.setPosition(clawOpenPos);
 
     }
     public void clawClose() {
-        claw.setPosition(0.29);
+        claw.setPosition(clawClosePos);
 
     }
 

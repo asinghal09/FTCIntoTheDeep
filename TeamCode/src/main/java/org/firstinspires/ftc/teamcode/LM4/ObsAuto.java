@@ -19,7 +19,7 @@ public class ObsAuto extends LinearOpMode {
 
         SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
         ArmSub slidesSubsystem = new ArmSub(hardwareMap, telemetry);
-        Pose2d startPos = new Pose2d(-10, 63, Math.toRadians(270));
+        Pose2d startPos = new Pose2d(-10, 63.5, Math.toRadians(270));
         drive.setPoseEstimate(startPos);
 
 

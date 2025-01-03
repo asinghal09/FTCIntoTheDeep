@@ -11,7 +11,7 @@ import org.firstinspires.ftc.teamcode.RoadRunner.trajectorysequence.TrajectorySe
 
 @Autonomous
 @Config
-public class NetAuto extends LinearOpMode {
+public class NetAutoSpecimen extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -19,7 +19,7 @@ public class NetAuto extends LinearOpMode {
 
         SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
         ArmSub slidesSubsystem = new ArmSub(hardwareMap, telemetry);
-        Pose2d startPos = new Pose2d(10, 63, Math.toRadians(270));
+        Pose2d startPos = new Pose2d(10, 63.5, Math.toRadians(270));
         drive.setPoseEstimate(startPos);
 
 
@@ -37,7 +37,7 @@ public class NetAuto extends LinearOpMode {
                     slidesSubsystem.runArmToPos(1200, 0.5);
                 })
                 .waitSeconds(0.9)
-                .splineToConstantHeading(new Vector2d(75, 30), Math.toRadians(270)) // to sample 1
+                .splineToConstantHeading(new Vector2d(80, 33), Math.toRadians(270)) // to sample 1
                 .addTemporalMarker(3.15, () -> {
                     slidesSubsystem.clawOpen();
                 })
@@ -60,14 +60,14 @@ public class NetAuto extends LinearOpMode {
                     slidesSubsystem.setSlides(3900);
 
                 })
-                .splineToSplineHeading(new Pose2d(87,57,Math.toRadians(45)),Math.toRadians(45)) //to basket first time
+                .splineToSplineHeading(new Pose2d(94,60,Math.toRadians(45)),Math.toRadians(45)) //to basket first time
                 .addTemporalMarker(9, () -> {
                     slidesSubsystem.clawOpen();
                  })
-                .waitSeconds(2)
+                .waitSeconds(1.5)
                 .setReversed(false)
-                .splineToSplineHeading(new Pose2d(89,30,Math.toRadians(270)),Math.toRadians(270))//to sample 2
-                .addTemporalMarker(11, () -> {
+                .splineToSplineHeading(new Pose2d(92,30,Math.toRadians(270)),Math.toRadians(270))//to sample 2
+                .addTemporalMarker(11.5, () -> {
                     slidesSubsystem.setSlides(550);
                 })
                 .addTemporalMarker(12, () -> {
@@ -86,7 +86,7 @@ public class NetAuto extends LinearOpMode {
                 })
                 .setReversed(true)
                 .waitSeconds(1.75)
-                .splineToSplineHeading(new Pose2d(85,55,Math.toRadians(45)),Math.toRadians(45)) //to basket 2nd time
+                .splineToSplineHeading(new Pose2d(90,56.5,Math.toRadians(45)),Math.toRadians(45)) //to basket 2nd time
                 .addTemporalMarker(18, () -> {
 
                     slidesSubsystem.clawOpen();
@@ -94,6 +94,13 @@ public class NetAuto extends LinearOpMode {
                 .waitSeconds(2)
                 .setReversed(false)
                 .splineToSplineHeading(new Pose2d(89,30,Math.toRadians(270)),Math.toRadians(270))//to sample 3
+                .addTemporalMarker(21, () -> {
+
+                    slidesSubsystem.setSlides(0);
+                    slidesSubsystem.runArmToPos(2000,1);
+                })
+                .setReversed(true)
+                .splineToSplineHeading(new Pose2d(23,-25,Math.toRadians(0)),Math.toRadians(180)) // to level 1 ascent
                 .build();
 
 

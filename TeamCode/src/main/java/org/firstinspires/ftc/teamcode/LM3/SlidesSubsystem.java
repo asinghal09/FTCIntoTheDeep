@@ -11,7 +11,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
-@Disabled
+
 @Config
 public class SlidesSubsystem {
 
@@ -22,6 +22,7 @@ public class SlidesSubsystem {
     public static double speedDivider = 3;
 
     public static double clawClosePos = 0.3;
+    public static double clawOpenPos = 0.6;
 
     //slide hard stops
     public static int maxSlidePos = 4800;
@@ -105,7 +106,7 @@ public class SlidesSubsystem {
     }
 
     public void clawOpen(){
-        claw.setPosition(0.6);
+        claw.setPosition(clawOpenPos);
 
     }
     public void clawClose() {

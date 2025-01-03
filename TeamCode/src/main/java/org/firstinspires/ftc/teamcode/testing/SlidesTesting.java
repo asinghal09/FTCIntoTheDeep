@@ -14,8 +14,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 
     DcMotor slides;
     DcMotorEx slidesJoint;
-
-
+    
 
     boolean isIntaking = false;
     boolean previousAState = false;
