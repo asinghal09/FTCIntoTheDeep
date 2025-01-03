@@ -6,11 +6,11 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.acmerobotics.dashboard.FtcDashboard;
-import com.acmerobotics.dashboard.config.Config;
+//import com.acmerobotics.dashboard.FtcDashboard;
+//import com.acmerobotics.dashboard.config.Config;
 
 @Autonomous
-@Config
+//@Config
 public class TestPot extends LinearOpMode {
     DcMotor frontLeft;
     DcMotor frontRight;
@@ -100,7 +100,7 @@ public class TestPot extends LinearOpMode {
 
         claw.setPosition(0.3);
 
-        FtcDashboard dashboard = FtcDashboard.getInstance();
+       // FtcDashboard dashboard = FtcDashboard.getInstance();
 
         waitForStart();
 

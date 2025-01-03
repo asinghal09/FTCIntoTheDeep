@@ -6,11 +6,11 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.acmerobotics.dashboard.FtcDashboard;
-import com.acmerobotics.dashboard.config.Config;
+//import com.acmerobotics.dashboard.FtcDashboard;
+//import com.acmerobotics.dashboard.config.Config;
 
 @Autonomous
-@Config
+//@Config
 
 public class BasketSampleAuto extends LinearOpMode {
     DcMotor frontLeft;
@@ -114,7 +114,7 @@ public class BasketSampleAuto extends LinearOpMode {
         joint.setPosition(0.15);
 
 
-        FtcDashboard dashboard = FtcDashboard.getInstance();
+      //  FtcDashboard dashboard = FtcDashboard.getInstance();
 
         waitForStart();
         //850 Ticks for 90 degrees

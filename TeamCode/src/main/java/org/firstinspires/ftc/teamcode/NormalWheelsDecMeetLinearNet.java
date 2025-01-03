@@ -5,11 +5,9 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.acmerobotics.dashboard.FtcDashboard;
-import com.acmerobotics.dashboard.config.Config;
 
 @Autonomous
-@Config
+
 
 public class NormalWheelsDecMeetLinearNet extends LinearOpMode {
     DcMotor frontLeft;
@@ -123,7 +121,6 @@ public class NormalWheelsDecMeetLinearNet extends LinearOpMode {
         claw.setPosition(0.2);
 
 
-        FtcDashboard dashboard = FtcDashboard.getInstance();
 
         waitForStart();
 

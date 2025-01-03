@@ -5,11 +5,11 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.acmerobotics.dashboard.FtcDashboard;
-import com.acmerobotics.dashboard.config.Config;
+//import com.acmerobotics.dashboard.FtcDashboard;
+//import com.acmerobotics.dashboard.config.Config;
 
 @Autonomous
-@Config
+//@Config
 
 public class NormalWheelsDecMeetLinearObs extends LinearOpMode {
     DcMotor frontLeft;
@@ -86,7 +86,7 @@ public class NormalWheelsDecMeetLinearObs extends LinearOpMode {
 
 
 
-        FtcDashboard dashboard = FtcDashboard.getInstance();
+      //  FtcDashboard dashboard = FtcDashboard.getInstance();
 
         waitForStart();
         //850 Ticks for 90 degrees

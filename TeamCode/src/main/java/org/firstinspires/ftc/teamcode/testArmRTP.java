@@ -5,11 +5,11 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.acmerobotics.dashboard.FtcDashboard;
-import com.acmerobotics.dashboard.config.Config;
+//import com.acmerobotics.dashboard.FtcDashboard;
+//import com.acmerobotics.dashboard.config.Config;
 
 @Autonomous
-@Config
+//@Config
 
 public class testArmRTP extends LinearOpMode {
     DcMotor frontLeft;
@@ -84,10 +84,10 @@ public class testArmRTP extends LinearOpMode {
 
 
     public void runOpMode() throws InterruptedException {
-        frontLeft = hardwareMap.get(DcMotor.class, "frontLeft");
-        frontRight = hardwareMap.get(DcMotor.class, "frontRight");
-        backLeft = hardwareMap.get(DcMotor.class, "backLeft");
-        backRight = hardwareMap.get(DcMotor.class, "backRight");
+        frontLeft = hardwareMap.get(DcMotor.class, "FrontLeft");
+        frontRight = hardwareMap.get(DcMotor.class, "FrontRight");
+        backLeft = hardwareMap.get(DcMotor.class, "BackLeft");
+        backRight = hardwareMap.get(DcMotor.class, "BackRight");
         claw = hardwareMap.get(Servo.class, "claw");
         clawJoint = hardwareMap.get(Servo.class, "joint");
         armbotJoint = hardwareMap.get(DcMotorEx.class, "arm1");
@@ -123,7 +123,7 @@ public class testArmRTP extends LinearOpMode {
         claw.setPosition(0.2);
 
 
-        FtcDashboard dashboard = FtcDashboard.getInstance();
+       // FtcDashboard dashboard = FtcDashboard.getInstance();
 
         waitForStart();
 
@@ -140,6 +140,7 @@ public class testArmRTP extends LinearOpMode {
         movearmBot(500,0.5);
         movearmMid(200, 0.5);
         clawJoint.setPosition(0.2);
+        sleep(5000);
 
 
         // Check if the elapsed time has reached the threshold
