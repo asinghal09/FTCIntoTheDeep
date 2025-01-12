@@ -9,14 +9,13 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 @com.qualcomm.robotcore.eventloop.opmode.TeleOp
 
-public class TeleOp2 extends OpMode {
+public class teleop3 extends OpMode {
     DcMotor frontLeft;
     DcMotor frontRight;
     DcMotor backRight;
     DcMotor backLeft;
     DcMotor joint1Motor;
     DcMotor joint2Motor;
-    Servo endJointServo;
     Servo clawServo;
 
     // PID coefficients
@@ -30,15 +29,10 @@ public class TeleOp2 extends OpMode {
     double integral1 = 0, lastError1 = 0;
     double integral2 = 0, lastError2 = 0;
 
-
     double armPowerScale = 0.5;  // Set to 50% power; adjust as needed
 
     boolean clawOpen = false; // Tracks claw state
     boolean clawTogglePressed = false; // Tracks button press for toggling
-
-    double endJointPosition = 0.5; // Initialize end joint servo position
-
-    double triggerStep = 0.02; // Adjust position change step for faster response
 
     @Override
     public void init() {
@@ -51,24 +45,21 @@ public class TeleOp2 extends OpMode {
         joint1Motor = hardwareMap.get(DcMotor.class, "arm1");
         joint2Motor = hardwareMap.get(DcMotor.class, "arm2");
 
-
         // Reset and set encoders
         joint1Motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         joint2Motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         joint1Motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         joint2Motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
+
         //set direction
         frontRight.setDirection(DcMotor.Direction.REVERSE);
         backRight.setDirection(DcMotor.Direction.REVERSE);
 
-        // Initialize servos
-
-        endJointServo = hardwareMap.get(Servo.class, "joint");
         clawServo = hardwareMap.get(Servo.class, "claw");
 
         telemetry.addData("Status", "Initialized");
-        }
+    }
     @Override
     public void loop() {
         double turn = gamepad1.left_stick_x; //forward and backward
@@ -125,40 +116,6 @@ public class TeleOp2 extends OpMode {
             joint2Motor.setPower(power2);
         }
 
-        if (gamepad2.right_trigger > 0.1) {
-            // Right trigger increases position
-            endJointPosition += triggerStep * gamepad2.right_trigger;
-        } else if (gamepad2.left_trigger > 0.1) {
-            // Left trigger decreases position
-            endJointPosition -= triggerStep * gamepad2.left_trigger;
-        }
-
-// Clamp end joint position to valid range (0.0 to 1.0)
-        endJointPosition = Math.max(0.0, Math.min(1.0, endJointPosition));
-        endJointServo.setPosition(endJointPosition);
-
-
-        // Button triggers for preset positions
-        if (gamepad2.a) { //for specimen
-            // Preset 1: Picking position
-            targetPosition1 = 1300;  // Joint 1 target in encoder ticks
-            targetPosition2 = 900;  // Joint 2 target in encoder ticks
-            endJointServo.setPosition(0.5); // end joint position
-            clawServo.setPosition(1.0);    // Claw open
-        } else if (gamepad2.y) { //for basket
-            // Preset 2: Placing position
-            targetPosition1 = 1400;
-            targetPosition2 = 700;
-            endJointServo.setPosition(0.5);
-            clawServo.setPosition(1.0);    // Claw mid-open
-        } else if (gamepad2.x) {
-            // Preset 3: Rest position
-            targetPosition1 = 0;
-            targetPosition2 = 0;
-            endJointServo.setPosition(0.0);
-            clawServo.setPosition(0.0);    // Claw closed
-        }
-
         // Toggle claw state with gamepad2.b
         if (gamepad2.b && !clawTogglePressed) {
             clawOpen = !clawOpen; // Toggle claw state
@@ -182,7 +139,6 @@ public class TeleOp2 extends OpMode {
         double power2 = calculatePID(currentPosition2, targetPosition2, kP2, kI2, kD2, integral2, lastError2) * armPowerScale;
         joint2Motor.setPower(power2);
 
-
         //display telemetry data
         telemetry.addData("Motors", "FL: %.2f, FR: %.2f, BL:%.2f, BR: %.2f", frontLeftPower, frontRightPower, backLeftPower, backRightPower);
         telemetry.addData("Joint1 Target", targetPosition1);
@@ -191,10 +147,9 @@ public class TeleOp2 extends OpMode {
         telemetry.addData("Joint2 Target", targetPosition2);
         telemetry.addData("Joint2 Current", currentPosition2);
         telemetry.addData("Joint2 Power", power2);
-        telemetry.addData("Joint Servo", endJointServo.getPosition());
         telemetry.addData("Claw Servo", clawServo.getPosition());
         telemetry.update();
-        }
+    }
 
     // PID calculation method
     private double calculatePID(double currentPosition, double targetPosition, double kP, double kI, double kD, double integral, double lastError) {
