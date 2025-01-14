@@ -12,7 +12,7 @@ import org.firstinspires.ftc.teamcode.RoadRunner.drive.SampleMecanumDrive;
 @Disabled
 @Autonomous
 @Config
-public class NetZoneAuto extends LinearOpMode {
+public class LM3NetZoneAuto extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {

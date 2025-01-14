@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.LM2;
 import com.acmerobotics.dashboard.config.Config;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -11,7 +12,7 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
-
+@Disabled
 @Config
 public class LM2SlidesSubsystem {
 

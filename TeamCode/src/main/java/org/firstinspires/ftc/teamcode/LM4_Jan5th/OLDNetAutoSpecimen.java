@@ -1,17 +1,18 @@
-package org.firstinspires.ftc.teamcode.LM4;
+package org.firstinspires.ftc.teamcode.LM4_Jan5th;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.teamcode.RoadRunner.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.RoadRunner.trajectorysequence.TrajectorySequence;
 
-
+@Disabled
 @Autonomous
 @Config
-public class NetAutoSpecimen extends LinearOpMode {
+public class OLDNetAutoSpecimen extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {

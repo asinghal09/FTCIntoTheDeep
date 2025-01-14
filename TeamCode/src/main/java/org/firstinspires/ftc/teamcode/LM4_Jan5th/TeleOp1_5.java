@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.LM4;
+package org.firstinspires.ftc.teamcode.LM4_Jan5th;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
@@ -8,6 +8,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 
 @Config
@@ -24,14 +25,16 @@ public class TeleOp1_5 extends LinearOpMode {
     DcMotorEx slidesJoint;
     DcMotorEx slides;
     Servo claw;
+
+    ElapsedTime timer;
     //DigitalChannel touchSensor;
 
     private boolean moveForward = false;
 
     boolean isOpen = false;
     boolean previousAState = false;
-    public static double clawOpen = 0.5;
-    public static double clawClose = 0.27;
+    public static double clawOpen = 0.58;
+    public static double clawClose = 0.37;
 
     public static double speedDivider = 2;
 
@@ -56,9 +59,9 @@ public class TeleOp1_5 extends LinearOpMode {
     private long lastTime;
 
     // Predefined positions for the arm
-    public static int armInitPos = 200;
-    public static int armIntakePos = 0;
-    public static int armBasketPos = 2200;
+    public static int armInitPos = 0;
+    public static int armDrivingAroundPos = 415;
+    public static int armBasketPos = 1650;
     public static int armChamberPos = 1100;
     public static int maxSlideJointPos = 1650;
     public static int minJointPos = 0;
@@ -81,6 +84,8 @@ public class TeleOp1_5 extends LinearOpMode {
         //touchSensor = hardwareMap.get(DigitalChannel.class, "touchSensor");
         //touchSensor.setMode(DigitalChannel.Mode.INPUT);
 
+        timer = new ElapsedTime();
+
         slidesJoint.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         slidesJoint.setDirection(DcMotorSimple.Direction.REVERSE);
         //slidesJoint.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -98,12 +103,32 @@ public class TeleOp1_5 extends LinearOpMode {
         FtcDashboard dashboard = FtcDashboard.getInstance();
 
         waitForStart();
+        timer.reset();
 
         if(isStopRequested()) return;
 
         lastTime = System.currentTimeMillis();
 
         while (opModeIsActive()) {
+
+        if(timer.seconds() > 10){
+            if (slidesJointTargetPos > maxSlideJointPos) {          //joint hardstops
+                slidesJointTargetPos = maxSlideJointPos;
+            } else if (slidesJointTargetPos <0){
+                slidesJointTargetPos = 0;
+            }
+            slidesJoint.setTargetPosition(slidesJointTargetPos);
+            slidesJoint.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+
+            if (slidesTargetPos < 0) //slides hardstops
+                slidesTargetPos = 0;
+            else if(slidesTargetPos>maxSlidePos)
+                slidesTargetPos = maxSlidePos;
+
+            slides.setTargetPosition(slidesTargetPos);
+            slides.setPower(1);
+        }
 
         double driving = -gamepad1.right_stick_y*0.75; // Forward/backward
         double turning = gamepad1.left_stick_x * 0.5; // Turning
@@ -145,60 +170,28 @@ public class TeleOp1_5 extends LinearOpMode {
             frontRight.setPower(0);
             backLeft.setPower(0);
             backRight.setPower(0);
-
         }
 
-        if (gamepad2.right_bumper){
+        if (gamepad2.right_bumper)
             slidesJointTargetPos = 1400;
 
-        }
 
-        if (gamepad2.y && !moveForward) {
+
+        if (gamepad2.y && !moveForward)
             moveForward = true;
-        }
-        /*
-        // If the robot is set to move forward
-        if (moveForward) {
-            frontLeft.setPower(0.25); // Move forward
-            frontRight.setPower(0.25);
-            backLeft.setPower(0.25);
-            backRight.setPower(0.25);
-            slidesTargetPos = 500;
-            slidesJointTargetPos= 400;
 
-            if (!touchSensor.getState()) { // Sensor is pressed (false when pressed)
-                moveForward = false;
-                frontLeft.setPower(0); // Stop the drive motors
-                frontRight.setPower(0);
-                backLeft.setPower(0);
-                backRight.setPower(0);
-                slidesTargetPos = 750;
-
-            }
-        }
-
-             */
-
-            //slides controls
-            slidesTargetPos += (int) (-gamepad2.left_stick_y * 30);
-
-            if (slidesTargetPos < 0)
-                slidesTargetPos = 0;
-            slides.setTargetPosition(slidesTargetPos);
-            slides.setPower(1);
+        //slides controls
+        slidesTargetPos += (int) (-gamepad2.left_stick_y * 30);
 
 
-            // Read joystick input, right stick Y-axis controls the motor position
-            double joystickInput = -gamepad2.right_stick_y;
+
+        // Read joystick input, right stick Y-axis controls the motor position
+        double joystickInput = -gamepad2.right_stick_y;
 
             //joint controls
             slidesJointTargetPos += (int) (joystickInput * 20);
 
-            if (slidesJointTargetPos > maxSlideJointPos) {
-                slidesJointTargetPos = maxSlideJointPos;
-            } else if (slidesJointTargetPos <=0){
-                slidesJointTargetPos = 0;
-            }
+
             slidesJoint.setTargetPosition(slidesJointTargetPos);
             slidesJoint.setPower(0.5);
 
@@ -208,31 +201,37 @@ public class TeleOp1_5 extends LinearOpMode {
                 slidesJoint.setTargetPosition(slidesJointTargetPos);
                 slidesJoint.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
+                slides.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                slidesTargetPos = 0;
+                slides.setTargetPosition(slidesTargetPos);
+                slides.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
             }
 
 
             // Check for button presses to set predefined positions
-            if (gamepad2.dpad_down) {    //set arm and slides position for intaking
-                setpoint = armIntakePos;
-                slidesJointTargetPos = armIntakePos;
-                slidesTargetPos = 50;
+            if (gamepad2.dpad_down) {    //set arm and slides position for intaking/init
+                setpoint = armInitPos;
+                slidesJointTargetPos = armInitPos;
+                slidesTargetPos = 0;
                 pidEnabled = true;
 
             } else if (gamepad2.dpad_up) {    //arm and slide position for high basket
                 setpoint = armBasketPos;
                 slidesJointTargetPos = armBasketPos;
                 pidEnabled = true;
-                slidesTargetPos = 5000;
+                slidesTargetPos = 3950;
 
             } else if (gamepad2.dpad_left) {   //arm and slide pos for high chamber
                 setpoint = armChamberPos;
                 slidesJointTargetPos = armChamberPos;
-                slidesTargetPos = 1050;
+                slidesTargetPos = 1140;
                 pidEnabled = true;
-            } else if (gamepad2.dpad_right) {   //arm and slide pos for high chamber
-                setpoint = armInitPos;
-                slidesJointTargetPos = armInitPos;
+            } else if (gamepad2.dpad_right) {   //arm and slide pos for Sub intaking
+                setpoint = armDrivingAroundPos;
+                slidesJointTargetPos = armDrivingAroundPos;
                 pidEnabled = true;
+
             }
 
 
@@ -241,15 +240,6 @@ public class TeleOp1_5 extends LinearOpMode {
                     slidesTargetPos = 3365;
                 }
             }
-
-            if (gamepad2.b){
-                slides.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                slidesTargetPos = 0;
-                slides.setTargetPosition(slidesTargetPos);
-                slides.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            }
-
-
 
 
             // Check if joystick is being moved
@@ -305,7 +295,7 @@ public class TeleOp1_5 extends LinearOpMode {
             telemetry.addData("Joystick Input", joystickInput);
             telemetry.addData("PID Enabled", pidEnabled);
             //telemetry.addData("Setpoint", setpoint);
-            telemetry.addData("Joint Setpoint", slidesJointTargetPos);
+            telemetry.addData("Joint Target", slidesJointTargetPos);
             telemetry.addData("Slides Joint Pos ", slidesJoint.getCurrentPosition());
             telemetry.addData("Slides Pos", slides.getCurrentPosition());
             telemetry.addData("Slides Target Position", slidesTargetPos);

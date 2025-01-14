@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.LM4;
+package org.firstinspires.ftc.teamcode.LM4_Jan5th;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
@@ -18,8 +18,8 @@ public class ArmSub {
     private Servo claw;
 
 
-    public static double clawOpenPos = 0.5;
-    public static double clawClosePos = 0.26;
+    public static double clawOpenPos = 0.58;
+    public static double clawClosePos = 0.37;
 
 
     public static double speedDivider = 3;

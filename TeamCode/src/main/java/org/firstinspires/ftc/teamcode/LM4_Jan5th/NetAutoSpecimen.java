@@ -1,10 +1,11 @@
-package org.firstinspires.ftc.teamcode.LM4;
+package org.firstinspires.ftc.teamcode.LM4_Jan5th;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.acmerobotics.roadrunner.trajectory.constraints.MinVelocityConstraint;
 import com.acmerobotics.roadrunner.trajectory.constraints.TranslationalVelocityConstraint;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.teamcode.RoadRunner.drive.SampleMecanumDrive;
@@ -12,10 +13,10 @@ import org.firstinspires.ftc.teamcode.RoadRunner.trajectorysequence.TrajectorySe
 
 import java.util.Arrays;
 
-
+@Disabled
 @Autonomous
 @Config
-public class NetAutoSample extends LinearOpMode {
+public class NetAutoSpecimen extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -28,18 +29,24 @@ public class NetAutoSample extends LinearOpMode {
 
 
         TrajectorySequence test = drive.trajectorySequenceBuilder(startPos)
-                .setVelConstraint(new MinVelocityConstraint(Arrays.asList(new TranslationalVelocityConstraint(17))))
-                .splineToSplineHeading(new Pose2d(68, 59.5, Math.toRadians(45)), Math.toRadians(45)) //to basket w preload
+                .splineToConstantHeading(new Vector2d(41, 35), Math.toRadians(270)) // to sub
                 .addTemporalMarker(0.1, () -> {
-                    slidesSubsystem.runArmToPos(1650, 1);
+                    slidesSubsystem.runArmToPos(900,1);
+
                 })
-                .addTemporalMarker(0.3, () -> {
-                    slidesSubsystem.setSlides(3900);
+                .addTemporalMarker(0.25, () -> {
+                    slidesSubsystem.setSlides(2570);
                 })
-                .resetConstraints()
-                .addTemporalMarker(2.25, () -> {
+
+                .setReversed(true)
+                .addTemporalMarker(1.75,() -> {
+                    slidesSubsystem.runArmToPos(1100,0.5);
+                })
+                .addTemporalMarker(3,() -> {
                     slidesSubsystem.clawOpen();
                 })
+                .waitSeconds(0.9)
+                .splineToConstantHeading(new Vector2d(44,45), Math.toRadians(90)) //back up from sub
                 .setReversed(true)
                 .splineToSplineHeading(new Pose2d(54.5,30.5,Math.toRadians(270)), Math.toRadians(270)) // to first sample
                 .addTemporalMarker(3.25, () -> {
