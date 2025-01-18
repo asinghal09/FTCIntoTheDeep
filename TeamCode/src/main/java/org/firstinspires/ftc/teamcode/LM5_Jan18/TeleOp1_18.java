@@ -1,8 +1,7 @@
-package org.firstinspires.ftc.teamcode.LM4_Jan5th;
+package org.firstinspires.ftc.teamcode.LM5_Jan18;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -11,12 +10,11 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-@Disabled
+
 @Config
 @TeleOp
 
-//joint pos for hanging specimens 0.6
-public class TeleOp1_5 extends LinearOpMode {
+public class TeleOp1_18 extends LinearOpMode {
 
     DcMotor frontLeft;
     DcMotor frontRight;
@@ -25,7 +23,7 @@ public class TeleOp1_5 extends LinearOpMode {
 
     DcMotorEx slidesJoint;
     DcMotorEx slides;
-    Servo claw;
+    Servo claw, joint, spinny;
 
     ElapsedTime timer;
     //DigitalChannel touchSensor;
@@ -34,8 +32,17 @@ public class TeleOp1_5 extends LinearOpMode {
 
     boolean isOpen = false;
     boolean previousAState = false;
-    public static double clawOpen = 0.58;
-    public static double clawClose = 0.37;
+
+
+    boolean isUp = false;               //for toggling joint up vs down position based on left bumper
+    boolean previousLBState = false;
+    public static double clawOpen = 0.6;
+    public static double clawClose = 0.35;
+
+    public static double spinnyNormalPos = 0.94;
+
+    public static double spinnyPos = 0.5;
+    public static double jointServoPos = 1;
 
     public static double speedDivider = 2;
 
@@ -55,15 +62,14 @@ public class TeleOp1_5 extends LinearOpMode {
     private double lastError = 0;
     private boolean pidEnabled = true;    //Track if PID is active
 
-
     // Time tracking for PID calculation
     private long lastTime;
 
     // Predefined positions for the arm
     public static int armInitPos = 0;
-    public static int armDrivingAroundPos = 415;
+    public static int armDrivingAroundPos = 400;
     public static int armBasketPos = 1650;
-    public static int armChamberPos = 1100;
+    public static int armChamberPos = 1300;
     public static int maxSlideJointPos = 1650;
     public static int minJointPos = 0;
 
@@ -79,6 +85,8 @@ public class TeleOp1_5 extends LinearOpMode {
         backRight.setDirection(DcMotorSimple.Direction.REVERSE);
 
         claw = hardwareMap.get(Servo.class, "claw");
+        joint = hardwareMap.get(Servo.class, "joint");
+        spinny = hardwareMap.get(Servo.class, "spinny");
 
         slidesJoint = hardwareMap.get(DcMotorEx.class, "slidesJoint");
         slides = hardwareMap.get(DcMotorEx.class, "slides");
@@ -115,12 +123,12 @@ public class TeleOp1_5 extends LinearOpMode {
         if(timer.seconds() > 10){
             if (slidesJointTargetPos > maxSlideJointPos) {          //joint hardstops
                 slidesJointTargetPos = maxSlideJointPos;
-            } else if (slidesJointTargetPos <0){
+            } else
+            if (slidesJointTargetPos <0){
                 slidesJointTargetPos = 0;
             }
             slidesJoint.setTargetPosition(slidesJointTargetPos);
             slidesJoint.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-
 
             if (slidesTargetPos < 0) //slides hardstops
                 slidesTargetPos = 0;
@@ -158,33 +166,11 @@ public class TeleOp1_5 extends LinearOpMode {
         backLeft.setPower(backLeftPower);
         backRight.setPower(backRightPower);
 
-
-        if (gamepad2.left_bumper){
-            frontLeft.setPower(-0.5);
-            frontRight.setPower(-0.5);
-            backLeft.setPower(-0.5);
-            backRight.setPower(-0.5);
-
-            sleep(100);
-
-            frontLeft.setPower(0);
-            frontRight.setPower(0);
-            backLeft.setPower(0);
-            backRight.setPower(0);
-        }
-
         if (gamepad2.right_bumper)
-            slidesJointTargetPos = 1400;
-
-
-
-        if (gamepad2.y && !moveForward)
-            moveForward = true;
+            slidesJointTargetPos = 950;
 
         //slides controls
         slidesTargetPos += (int) (-gamepad2.left_stick_y * 30);
-
-
 
         // Read joystick input, right stick Y-axis controls the motor position
         double joystickInput = -gamepad2.right_stick_y;
@@ -192,10 +178,12 @@ public class TeleOp1_5 extends LinearOpMode {
             //joint controls
             slidesJointTargetPos += (int) (joystickInput * 20);
 
-
             slidesJoint.setTargetPosition(slidesJointTargetPos);
             slidesJoint.setPower(0.5);
 
+            //code for manual reset of slides and slidesjoint hardstop
+            //NEEDS TO BE RE-ADDED AFTER DONE WITH TESTING
+            /*
             if (gamepad2.left_trigger > 0.05){
                 slidesJoint.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                 slidesJointTargetPos = 0;
@@ -206,9 +194,8 @@ public class TeleOp1_5 extends LinearOpMode {
                 slidesTargetPos = 0;
                 slides.setTargetPosition(slidesTargetPos);
                 slides.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-
             }
-
+            */
 
             // Check for button presses to set predefined positions
             if (gamepad2.dpad_down) {    //set arm and slides position for intaking/init
@@ -216,25 +203,30 @@ public class TeleOp1_5 extends LinearOpMode {
                 slidesJointTargetPos = armInitPos;
                 slidesTargetPos = 0;
                 pidEnabled = true;
+                jointServoPos = 1;
+                spinnyPos = spinnyNormalPos;
 
             } else if (gamepad2.dpad_up) {    //arm and slide position for high basket
                 setpoint = armBasketPos;
                 slidesJointTargetPos = armBasketPos;
                 pidEnabled = true;
                 slidesTargetPos = 3950;
+                jointServoPos = 1;
+                spinnyPos = spinnyNormalPos;
 
             } else if (gamepad2.dpad_left) {   //arm and slide pos for high chamber
                 setpoint = armChamberPos;
                 slidesJointTargetPos = armChamberPos;
-                slidesTargetPos = 1140;
+                slidesTargetPos = 675;
                 pidEnabled = true;
+                spinnyPos = spinnyNormalPos;
             } else if (gamepad2.dpad_right) {   //arm and slide pos for Sub intaking
                 setpoint = armDrivingAroundPos;
                 slidesJointTargetPos = armDrivingAroundPos;
                 pidEnabled = true;
-
+                jointServoPos = 0;
+                spinnyPos = spinnyNormalPos;
             }
-
 
             if (slidesJointTargetPos > 0 && slidesJointTargetPos <850) {
                 if (slidesTargetPos > 3365) {
@@ -242,66 +234,41 @@ public class TeleOp1_5 extends LinearOpMode {
                 }
             }
 
-
-            // Check if joystick is being moved
-            /*if (Math.abs(joystickInput) > 0.05) {  // Threshold to avoid noise
-                // Disable PID control and allow manual control
-                pidEnabled = false;
-                slidesJoint.setPower(joystickInput / speedDivider);
-
-            } else if (!pidEnabled) {
-                //joystick has been released
-                setpoint = slidesJoint.getCurrentPosition();
-                pidEnabled = true;
-                integralSum = 0;
-                lastError = 0;
+            if (gamepad2.x){
+                jointServoPos += 0.05;
             }
-            // When joystick is not moving and PID is enabled, continue with PID control
-            if (pidEnabled) {
-                // Apply PID control
-                double currentPosition = slidesJoint.getCurrentPosition();
-                double error = setpoint - currentPosition;
+            else if (gamepad2.y){
+                jointServoPos -= 0.05;
+            }
+            joint.setPosition(jointServoPos);
 
-                // Calculate time step (delta time)
-                long currentTime = System.currentTimeMillis();
-                double deltaTime = (currentTime - lastTime) / 1000.0;  // Convert to seconds
-                lastTime = currentTime;
 
-                // Proportional term
-                double pTerm = Kp * error;
 
-                // Integral term
-                integralSum += error * deltaTime;
-                double iTerm = Ki * integralSum;
+            spinnyPos += (gamepad2.left_trigger/10) - (gamepad2.right_trigger/10);
+            if (spinnyPos > 1)
+                    spinnyPos = 1;
+            else if (spinnyPos < 0)
+                spinnyPos = 0;
 
-                // Derivative term
-                double derivative = (error - lastError) / deltaTime;
-                double dTerm = Kd * derivative;
-
-                // Calculate final PID output
-                double output = pTerm + iTerm + dTerm;
-
-                // Limit motor power to [-1, 1]
-                output = Math.max(-1, Math.min(output, 1));
-
-                // Set motor power based on PID output
-                slidesJoint.setPower(output / speedDivider);
-
-                lastError = error;
-                telemetry.addData("output", output);
+            if(gamepad2.b){
+                spinnyPos = spinnyNormalPos;
             }
 
-             */
+            spinny.setPosition(spinnyPos);
+
             // Send telemetry to the dashboard
             telemetry.addData("Joystick Input", joystickInput);
-            telemetry.addData("PID Enabled", pidEnabled);
+            //telemetry.addData("PID Enabled", pidEnabled);
             //telemetry.addData("Setpoint", setpoint);
             telemetry.addData("Joint Target", slidesJointTargetPos);
             telemetry.addData("Slides Joint Pos ", slidesJoint.getCurrentPosition());
             telemetry.addData("Slides Pos", slides.getCurrentPosition());
             telemetry.addData("Slides Target Position", slidesTargetPos);
+            telemetry.addData("Spinny Target Pos",spinnyPos);
+            telemetry.addData("Spinny Actual Pos", spinny.getPosition());
+            telemetry.addData("Joint Target Pos",jointServoPos);
+            telemetry.addData("Joint Actual Pos", joint.getPosition());
             telemetry.update();
-
 
             // Toggle claw opening/closing when 'A' button is pressed
             boolean currentAState = gamepad2.a;
@@ -317,6 +284,20 @@ public class TeleOp1_5 extends LinearOpMode {
             }
             // Update the previous state of the 'A' button
             previousAState = currentAState;
+
+            boolean currentLBState = gamepad2.left_bumper;
+            if (currentLBState && !previousLBState) {
+                // Toggle the state of the claw's servo joint
+                isUp = !isUp;
+
+                if (isUp) {
+                    jointServoPos = 0;
+                } else {
+                    jointServoPos = 1;
+                }
+            }
+            // Update the previous state of the 'LB' button
+            previousLBState = currentLBState;
         }
     }
 }

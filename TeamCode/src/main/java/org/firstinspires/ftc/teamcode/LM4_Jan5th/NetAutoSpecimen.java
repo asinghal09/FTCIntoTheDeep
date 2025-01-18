@@ -2,16 +2,12 @@ package org.firstinspires.ftc.teamcode.LM4_Jan5th;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
-import com.acmerobotics.roadrunner.trajectory.constraints.MinVelocityConstraint;
-import com.acmerobotics.roadrunner.trajectory.constraints.TranslationalVelocityConstraint;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.teamcode.RoadRunner.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.RoadRunner.trajectorysequence.TrajectorySequence;
-
-import java.util.Arrays;
 
 @Disabled
 @Autonomous
@@ -23,7 +19,7 @@ public class NetAutoSpecimen extends LinearOpMode {
 
 
         SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
-        ArmSub slidesSubsystem = new ArmSub(hardwareMap, telemetry);
+        ArmSubOld slidesSubsystem = new ArmSubOld(hardwareMap, telemetry);
         Pose2d startPos = new Pose2d(40, 63.5, Math.toRadians(270));
         drive.setPoseEstimate(startPos);
 

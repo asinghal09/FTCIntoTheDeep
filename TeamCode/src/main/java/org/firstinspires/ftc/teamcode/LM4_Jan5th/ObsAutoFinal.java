@@ -5,6 +5,7 @@ import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.acmerobotics.roadrunner.trajectory.constraints.MinVelocityConstraint;
 import com.acmerobotics.roadrunner.trajectory.constraints.TranslationalVelocityConstraint;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.teamcode.RoadRunner.drive.SampleMecanumDrive;
@@ -12,7 +13,7 @@ import org.firstinspires.ftc.teamcode.RoadRunner.trajectorysequence.TrajectorySe
 
 import java.util.Arrays;
 
-
+@Disabled
 @Autonomous
 @Config
 public class ObsAutoFinal extends LinearOpMode {
@@ -22,7 +23,7 @@ public class ObsAutoFinal extends LinearOpMode {
 
 
         SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
-        ArmSub slidesSubsystem = new ArmSub(hardwareMap, telemetry);
+        ArmSubOld slidesSubsystem = new ArmSubOld(hardwareMap, telemetry);
         Pose2d startPos = new Pose2d(-10, 63.5, Math.toRadians(270));
         drive.setPoseEstimate(startPos);
 

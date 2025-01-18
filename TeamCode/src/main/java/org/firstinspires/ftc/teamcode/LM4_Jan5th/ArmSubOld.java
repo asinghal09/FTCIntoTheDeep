@@ -12,7 +12,7 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 
 @Config
-public class ArmSub {
+public class ArmSubOld {
 
     private DcMotorEx slidesJoint, slides;
     private Servo claw;
@@ -49,7 +49,7 @@ public class ArmSub {
     public static int armDeliverPos = 460;
     public static int armDriveAroundPos = 170;
 
-    public ArmSub(HardwareMap hardwareMap, Telemetry telemetry) {
+    public ArmSubOld(HardwareMap hardwareMap, Telemetry telemetry) {
 
         claw = hardwareMap.get(Servo.class, "claw");
         slidesJoint = hardwareMap.get(DcMotorEx.class, "slidesJoint");
