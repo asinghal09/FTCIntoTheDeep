@@ -67,7 +67,7 @@ public class TeleOp1_18 extends LinearOpMode {
 
     // Predefined positions for the arm
     public static int armInitPos = 0;
-    public static int armDrivingAroundPos = 400;
+    public static int armDrivingAroundPos = 450;
     public static int armBasketPos = 1650;
     public static int armChamberPos = 1300;
     public static int maxSlideJointPos = 1650;
@@ -104,6 +104,7 @@ public class TeleOp1_18 extends LinearOpMode {
         int slidesTargetPos = 0;
         slides.setTargetPosition(slidesTargetPos);
         slides.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        slides.setPower(1);
         int slidesJointTargetPos = 0;
         slidesJoint.setTargetPosition(slidesJointTargetPos);
         slidesJoint.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -120,7 +121,7 @@ public class TeleOp1_18 extends LinearOpMode {
 
         while (opModeIsActive()) {
 
-        if(timer.seconds() > 10){
+        if(timer.seconds() > 15){
             if (slidesJointTargetPos > maxSlideJointPos) {          //joint hardstops
                 slidesJointTargetPos = maxSlideJointPos;
             } else
@@ -136,6 +137,7 @@ public class TeleOp1_18 extends LinearOpMode {
                 slidesTargetPos = maxSlidePos;
 
             slides.setTargetPosition(slidesTargetPos);
+            slides.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             slides.setPower(1);
         }
 
@@ -167,10 +169,14 @@ public class TeleOp1_18 extends LinearOpMode {
         backRight.setPower(backRightPower);
 
         if (gamepad2.right_bumper)
-            slidesJointTargetPos = 950;
+            slidesJointTargetPos = 900;
 
         //slides controls
         slidesTargetPos += (int) (-gamepad2.left_stick_y * 30);
+
+        slides.setTargetPosition(slidesTargetPos);
+        slides.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        slides.setPower(1);
 
         // Read joystick input, right stick Y-axis controls the motor position
         double joystickInput = -gamepad2.right_stick_y;
@@ -183,8 +189,8 @@ public class TeleOp1_18 extends LinearOpMode {
 
             //code for manual reset of slides and slidesjoint hardstop
             //NEEDS TO BE RE-ADDED AFTER DONE WITH TESTING
-            /*
-            if (gamepad2.left_trigger > 0.05){
+
+            if (gamepad2.back){
                 slidesJoint.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                 slidesJointTargetPos = 0;
                 slidesJoint.setTargetPosition(slidesJointTargetPos);
@@ -195,7 +201,6 @@ public class TeleOp1_18 extends LinearOpMode {
                 slides.setTargetPosition(slidesTargetPos);
                 slides.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             }
-            */
 
             // Check for button presses to set predefined positions
             if (gamepad2.dpad_down) {    //set arm and slides position for intaking/init
@@ -229,8 +234,8 @@ public class TeleOp1_18 extends LinearOpMode {
             }
 
             if (slidesJointTargetPos > 0 && slidesJointTargetPos <850) {
-                if (slidesTargetPos > 3365) {
-                    slidesTargetPos = 3365;
+                if (slidesTargetPos > 3000) {
+                    slidesTargetPos = 3000;
                 }
             }
 
@@ -242,9 +247,7 @@ public class TeleOp1_18 extends LinearOpMode {
             }
             joint.setPosition(jointServoPos);
 
-
-
-            spinnyPos += (gamepad2.left_trigger/10) - (gamepad2.right_trigger/10);
+            spinnyPos += (gamepad2.left_trigger/15) - (gamepad2.right_trigger/15);
             if (spinnyPos > 1)
                     spinnyPos = 1;
             else if (spinnyPos < 0)

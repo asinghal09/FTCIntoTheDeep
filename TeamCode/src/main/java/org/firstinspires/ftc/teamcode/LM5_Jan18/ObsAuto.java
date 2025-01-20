@@ -70,6 +70,15 @@ public class ObsAuto extends LinearOpMode {
                 .setVelConstraint(new MinVelocityConstraint(Arrays.asList(new TranslationalVelocityConstraint(35)))) //slow speed for plowing 2nd one in
                 .splineToConstantHeading (new Vector2d(-51,60),Math.toRadians(90)) //pushes 2nd sample in
                 .resetConstraints()
+                .addTemporalMarker(11,() -> {
+                    slidesSubsystem.setJoint(1);
+                    slidesSubsystem.runArmToPos(0,1);
+                    slidesSubsystem.setSlides(0);
+
+        }       )
+                .waitSeconds(5)
+
+                /*
                 .splineToSplineHeading(new Pose2d(-50,40,Math.toRadians(90)),Math.toRadians(0))
                 .waitSeconds(0.5)
                 .forward(10)
