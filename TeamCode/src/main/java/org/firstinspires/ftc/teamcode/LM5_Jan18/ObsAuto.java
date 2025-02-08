@@ -7,7 +7,6 @@ import com.acmerobotics.roadrunner.trajectory.constraints.TranslationalVelocityC
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
-import org.firstinspires.ftc.teamcode.LM4_Jan5th.ArmSubOld;
 import org.firstinspires.ftc.teamcode.RoadRunner.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.RoadRunner.trajectorysequence.TrajectorySequence;
 
@@ -23,7 +22,7 @@ public class ObsAuto extends LinearOpMode {
 
 
         SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
-        ArmSub slidesSubsystem = new ArmSub(hardwareMap, telemetry);
+        ArmSubOld slidesSubsystem = new ArmSubOld(hardwareMap, telemetry);
         Pose2d startPos = new Pose2d(-10, 63.5, Math.toRadians(270));
         drive.setPoseEstimate(startPos);
 

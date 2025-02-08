@@ -3,6 +3,7 @@ import com.acmerobotics.dashboard.FtcDashboard;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
+import org.firstinspires.ftc.teamcode.LM5_Jan18.ArmSubOld;
 import org.openftc.easyopencv.*;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
@@ -13,6 +14,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.teamcode.RoadRunner.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.RoadRunner.trajectorysequence.TrajectorySequence;
+import org.firstinspires.ftc.teamcode.QualifierCode.ArmSub;
 
 import java.util.Arrays;
 
@@ -23,6 +25,9 @@ public class WebcamAlignment extends LinearOpMode {
 
     @Override
     public void runOpMode() {
+
+        ArmSub slidesSub = new ArmSub(hardwareMap, telemetry);
+
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier(
                 "cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
 
@@ -33,21 +38,11 @@ public class WebcamAlignment extends LinearOpMode {
         SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
 
 
+
         Pose2d startPos = new Pose2d(45, 63.5, Math.toRadians(270));
         drive.setPoseEstimate(startPos);
 
-
-        TrajectorySequence left = drive.trajectorySequenceBuilder(startPos)
-                .strafeLeft(2)
-                .build();
-
-        TrajectorySequence right = drive.trajectorySequenceBuilder(startPos)
-                .strafeRight(2)
-                .build();
-
-        TrajectorySequence back = drive.trajectorySequenceBuilder(startPos)
-                .back(2)
-                .build();
+        boolean isAligned = true;
 
 
 
@@ -69,29 +64,57 @@ public class WebcamAlignment extends LinearOpMode {
             }
         });
 
+
+
         waitForStart();
-
-
+        slidesSub.setJoint(0.4);
+        slidesSub.clawOpen();
+        slidesSub.spin(0.61);
+        slidesSub.runArmToPos(300,1);
 
         while (opModeIsActive()) {
 
+            telemetry = FtcDashboard.getInstance().getTelemetry();
+
 
             String alignment = pipeline.getAlignmentStatus();
-            //telemetry.addData("Alignment", alignment);
+            telemetry.addData("Alignment", alignment);
 
             // **Example: Use Alignment Data to Adjust Robot Movement**
             if (gamepad1.a) { // Example: Press 'A' to auto-align
-                if (alignment.equals("Move Left")) {
-                    // Move robot left
-                    drive.followTrajectorySequence(left);
-                } else if (alignment.equals("Move Right")) {
-                    // Move robot right
-                    drive.followTrajectorySequence(right);
-                } else {
-                    // Stop movement
-                    drive.followTrajectorySequence(back);
+                isAligned = false;
+                while (!isAligned) {
+                    double xMove = pipeline.calcXMovement();
+                    double yMove = pipeline.calcYMovement();
+
+                    if (Math.abs(xMove) > 0.25) {
+                        startPos = drive.getPoseEstimate();
+                        TrajectorySequence moveX = drive.trajectorySequenceBuilder(startPos)
+                                .strafeRight(xMove)
+                                .build();
+                        drive.followTrajectorySequence(moveX);
+                    }
+                    if (Math.abs(yMove) > 0.25){
+                        startPos = drive.getPoseEstimate();
+                        TrajectorySequence forward = drive.trajectorySequenceBuilder(startPos)
+                                .forward(yMove)
+                                .build();
+                        drive.followTrajectorySequence(forward);
+                    }
+
+
+                    if (Math.abs(xMove) <= 0.25 && Math.abs(yMove) <= 0.25) {
+                        isAligned = true;
+                        slidesSub.clawClose();
+                    }
                 }
             }
+            telemetry.addData("x position: ", pipeline.getXPos());
+            telemetry.addData("width" , pipeline.getObjectWidth());
+            telemetry.addData("distance", pipeline.getDistance());
+            telemetry.addData("X movement ", pipeline.calcXMovement());
+            telemetry.addData("y movement", pipeline.calcYMovement());
+            telemetry.addData("is Aligned", isAligned);
             telemetry.update();
         }
     }

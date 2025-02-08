@@ -20,7 +20,7 @@ public class NetAutoWORKING extends LinearOpMode {
 
 
         SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
-        ArmSub slidesSubsystem = new ArmSub(hardwareMap, telemetry);
+        ArmSubOld slidesSubsystem = new ArmSubOld(hardwareMap, telemetry);
         Pose2d startPos = new Pose2d(45, 63.5, Math.toRadians(270));
         drive.setPoseEstimate(startPos);
 
