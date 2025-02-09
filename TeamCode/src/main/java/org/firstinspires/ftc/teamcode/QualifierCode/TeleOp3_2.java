@@ -10,6 +10,10 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.teamcode.RoadRunner.drive.SampleMecanumDrive;
+import org.firstinspires.ftc.teamcode.testing.AlignmentPipeline;
+import org.firstinspires.ftc.teamcode.testing.WebcamAlignment;
+
 
 @Config
 @TeleOp
@@ -24,6 +28,12 @@ public class TeleOp3_2 extends LinearOpMode {
     DcMotorEx slidesJoint;
     DcMotorEx slides;
     Servo claw, joint, spinny;
+
+    WebcamAlignment webcam = new WebcamAlignment();
+    AlignmentPipeline pipeline = new AlignmentPipeline();
+    ArmSub slidesSub = new ArmSub(hardwareMap, telemetry);
+    SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
+
 
     ElapsedTime timer;
     //DigitalChannel touchSensor;
@@ -167,6 +177,9 @@ public class TeleOp3_2 extends LinearOpMode {
         frontRight.setPower(frontRightPower);
         backLeft.setPower(backLeftPower);
         backRight.setPower(backRightPower);
+
+        if (gamepad1.a)
+            webcam.alignOnce(drive, pipeline, slidesSub);
 
         if (gamepad2.right_bumper)
             slidesJointTargetPos = 900;

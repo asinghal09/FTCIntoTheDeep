@@ -20,8 +20,8 @@ public class AlignmentPipeline extends OpenCvPipeline {
     private double distance = -1;
     private double xMove = 0;
     public double yMove = 0;
-    private double targetX = 190;
-    private double targetY = 8.2;
+    private double targetX = 320;
+    private double targetY = 15;
 
     private static final double SAMPLE_WIDTH = 3.81;
     private static final double FOCAL_LENGTH = 1008;//calculated by doing (216 pixels * 17.78 cm)/3.81cm
