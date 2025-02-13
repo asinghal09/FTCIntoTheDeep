@@ -5,6 +5,7 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.Servo;
 
 @com.qualcomm.robotcore.eventloop.opmode.TeleOp
 
@@ -14,6 +15,7 @@ public class ascentslides extends OpMode{
     DcMotor backLeft;
     DcMotor backRight;
     DcMotor slideMotor;  // Single motor for slide
+    Servo clawServo;
 
     // PID coefficients
     double kP = 0.01, kI = 0.0, kD = 0.0; // For slideMotor
@@ -23,16 +25,21 @@ public class ascentslides extends OpMode{
 
     double integral = 0, lastError = 0;
 
+    boolean clawOpen = false; // Tracks claw state
+    boolean clawTogglePressed = false; // Tracks button press for toggling
+
     double armPowerScale = 0.5;  // Set to 50% power; adjust as needed
+
 
     @Override
     public void init() {
         // Initialize motors
-        frontLeft = hardwareMap.get(DcMotor.class, "FrontLeft");
-        frontRight = hardwareMap.get(DcMotor.class, "FrontRight");
-        backLeft = hardwareMap.get(DcMotor.class, "BackLeft");
-        backRight = hardwareMap.get(DcMotor.class, "BackRight");
+        frontLeft = hardwareMap.get(DcMotor.class, "frontLeft");
+        frontRight = hardwareMap.get(DcMotor.class, "frontRight");
+        backLeft = hardwareMap.get(DcMotor.class, "backLeft");
+        backRight = hardwareMap.get(DcMotor.class, "backRight");
         slideMotor = hardwareMap.get(DcMotor.class, "slideMotor");
+        clawServo = hardwareMap.get(Servo.class, "claw");
 
         // Reset and set encoders for slideMotor
         slideMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -47,15 +54,15 @@ public class ascentslides extends OpMode{
 
     @Override
     public void loop() {
-        // Drive control using gamepad1
-        double turn = gamepad1.left_stick_x; // forward/backward movement
-        double drive = -gamepad1.right_stick_y; // turn left/right movement
+        double turn = gamepad1.left_stick_x; //forward and backward
+        double drive = -gamepad1.right_stick_y; //turn right and left
+        double strafe = gamepad1.right_trigger - gamepad1.left_trigger;
 
-        // Calculate power for drive motors
-        double frontLeftPower = drive + turn;
-        double frontRightPower = drive - turn;
-        double backLeftPower = drive + turn;
-        double backRightPower = drive - turn;
+        //calculate power
+        double frontLeftPower = drive + turn + strafe;
+        double frontRightPower = drive - turn - strafe; 0: frontLeft 1: backleft 2: frontright 3: backright
+        double backLeftPower = drive + turn - strafe;
+        double backRightPower = drive - turn + strafe;
 
         // Set motor powers for driving
         frontLeft.setPower(frontLeftPower);
@@ -81,11 +88,23 @@ public class ascentslides extends OpMode{
             double power = calculatePID(currentPosition, targetPosition, kP, kI, kD, integral, lastError);
             slideMotor.setPower(power);
         }
+        if (gamepad2.b && !clawTogglePressed) {
+            clawOpen = !clawOpen; // Toggle claw state
+            clawTogglePressed = true; // Prevent multiple toggles on one press
+            if (clawOpen) {
+                clawServo.setPosition(1.0); // Fully open claw
+            } else {
+                clawServo.setPosition(0.0); // Fully close claw
+            }
+        } else if (!gamepad2.b) {
+            clawTogglePressed = false; // Reset toggle state
+        }
 
         // Display telemetry data
         telemetry.addData("Motors", "FL: %.2f, FR: %.2f, BL: %.2f, BR: %.2f", frontLeftPower, frontRightPower, backLeftPower, backRightPower);
         telemetry.addData("SlideMotor Target", targetPosition);
         telemetry.addData("SlideMotor Current", slideMotor.getCurrentPosition());
+        telemetry.addData("Claw Servo", clawServo.getPosition());
         telemetry.update();
     }
 
