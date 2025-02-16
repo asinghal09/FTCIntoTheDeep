@@ -1,27 +1,26 @@
-package org.firstinspires.ftc.teamcode.LM5_Jan18;
+package org.firstinspires.ftc.teamcode.QualifierCode;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.trajectory.constraints.MinVelocityConstraint;
 import com.acmerobotics.roadrunner.trajectory.constraints.TranslationalVelocityConstraint;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.teamcode.RoadRunner05x.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.RoadRunner05x.trajectorysequence.TrajectorySequence;
 
 import java.util.Arrays;
-@Disabled
+
 @Autonomous
 @Config
-public class NetAuto4Sample extends LinearOpMode {
+public class NetAutoFinal extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
 
 
         SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
-        ArmSubOld slidesSubsystem = new ArmSubOld(hardwareMap, telemetry);
+        ArmSub slidesSubsystem = new ArmSub(hardwareMap, telemetry);
         Pose2d startPos = new Pose2d(45, 63.5, Math.toRadians(270));
         drive.setPoseEstimate(startPos);
 
@@ -136,8 +135,8 @@ public class NetAuto4Sample extends LinearOpMode {
 
 
         slidesSubsystem.clawClose();
-        slidesSubsystem.setJoint(1);
-        slidesSubsystem.spin(0.94);
+        slidesSubsystem.setJoint(0.5);
+        slidesSubsystem.spin(0.61);
 
 
         waitForStart();

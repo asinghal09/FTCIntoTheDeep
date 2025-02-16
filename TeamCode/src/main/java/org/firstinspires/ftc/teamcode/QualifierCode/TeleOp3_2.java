@@ -10,9 +10,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.teamcode.RoadRunner.drive.SampleMecanumDrive;
-import org.firstinspires.ftc.teamcode.testing.AlignmentPipeline;
-import org.firstinspires.ftc.teamcode.testing.WebcamAlignment;
+import org.firstinspires.ftc.teamcode.RoadRunner05x.drive.SampleMecanumDrive;
 
 
 @Config
@@ -29,12 +27,6 @@ public class TeleOp3_2 extends LinearOpMode {
     DcMotorEx slides;
     Servo claw, joint, spinny;
 
-    WebcamAlignment webcam = new WebcamAlignment();
-    AlignmentPipeline pipeline = new AlignmentPipeline();
-    ArmSub slidesSub = new ArmSub(hardwareMap, telemetry);
-    SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
-
-
     ElapsedTime timer;
     //DigitalChannel touchSensor;
 
@@ -46,8 +38,8 @@ public class TeleOp3_2 extends LinearOpMode {
 
     boolean isUp = false;               //for toggling joint up vs down position based on left bumper
     boolean previousLBState = false;
-    public static double clawOpen = 0.6;
-    public static double clawClose = 0.35;
+    public static double clawOpen = 0.9;
+    public static double clawClose = 0.63;
 
     public static double spinnyNormalPos = 0.61;
 
@@ -121,7 +113,12 @@ public class TeleOp3_2 extends LinearOpMode {
 
         // FTC Dashboard
         FtcDashboard dashboard = FtcDashboard.getInstance();
+        //WebcamAlignment webcam = new WebcamAlignment();
+        //AlignmentPipeline pipeline = new AlignmentPipeline();
+        ArmSub slidesSub = new ArmSub(hardwareMap, telemetry);
+        SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
 
+        
         waitForStart();
         timer.reset();
 
@@ -178,8 +175,8 @@ public class TeleOp3_2 extends LinearOpMode {
         backLeft.setPower(backLeftPower);
         backRight.setPower(backRightPower);
 
-        if (gamepad1.a)
-            webcam.alignOnce(drive, pipeline, slidesSub);
+        //if (gamepad1.a)
+            //webcam.alignOnce(drive, pipeline, slidesSub);
 
         if (gamepad2.right_bumper)
             slidesJointTargetPos = 900;
@@ -258,6 +255,11 @@ public class TeleOp3_2 extends LinearOpMode {
             else if (gamepad2.y){
                 jointServoPos -= 0.05;
             }
+            if (jointServoPos < 0)
+                jointServoPos = 0;
+            if (jointServoPos > 1)
+                jointServoPos = 1;
+
             joint.setPosition(jointServoPos);
 
             spinnyPos += (gamepad2.left_trigger/15) - (gamepad2.right_trigger/15);

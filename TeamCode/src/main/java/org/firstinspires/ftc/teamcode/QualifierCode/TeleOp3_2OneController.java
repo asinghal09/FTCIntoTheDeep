@@ -1,8 +1,7 @@
-package org.firstinspires.ftc.teamcode.LM5_Jan18;
+package org.firstinspires.ftc.teamcode.QualifierCode;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -11,11 +10,13 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-@Disabled
+import org.firstinspires.ftc.teamcode.RoadRunner05x.drive.SampleMecanumDrive;
+
+
 @Config
 @TeleOp
 
-public class TeleOp1_18 extends LinearOpMode {
+public class TeleOp3_2OneController extends LinearOpMode {
 
     DcMotor frontLeft;
     DcMotor frontRight;
@@ -37,13 +38,13 @@ public class TeleOp1_18 extends LinearOpMode {
 
     boolean isUp = false;               //for toggling joint up vs down position based on left bumper
     boolean previousLBState = false;
-    public static double clawOpen = 0.6;
-    public static double clawClose = 0.35;
+    public static double clawOpen = 0.9;
+    public static double clawClose = 0.63;
 
-    public static double spinnyNormalPos = 0.94;
+    public static double spinnyNormalPos = 0.61;
 
     public static double spinnyPos = 0.5;
-    public static double jointServoPos = 1;
+    public static double jointServoPos = 0.5;
 
     public static double speedDivider = 2;
 
@@ -112,7 +113,12 @@ public class TeleOp1_18 extends LinearOpMode {
 
         // FTC Dashboard
         FtcDashboard dashboard = FtcDashboard.getInstance();
+        //WebcamAlignment webcam = new WebcamAlignment();
+        //AlignmentPipeline pipeline = new AlignmentPipeline();
+        ArmSub slidesSub = new ArmSub(hardwareMap, telemetry);
+        SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
 
+        
         waitForStart();
         timer.reset();
 
@@ -143,7 +149,7 @@ public class TeleOp1_18 extends LinearOpMode {
         }
 
         double driving = -gamepad1.right_stick_y*0.75; // Forward/backward
-        double turning = gamepad1.left_stick_x * 0.5; // Turning
+        double turning = gamepad1.right_stick_x * 0.5; // Turning
         double strafing = gamepad1.right_trigger - gamepad1.left_trigger; // Strafing
 
         // Combine inputs for each motor
@@ -169,18 +175,21 @@ public class TeleOp1_18 extends LinearOpMode {
         backLeft.setPower(backLeftPower);
         backRight.setPower(backRightPower);
 
-        if (gamepad2.right_bumper)
+        //if (gamepad1.a)
+            //webcam.alignOnce(drive, pipeline, slidesSub);
+
+        if (gamepad1.right_bumper)
             slidesJointTargetPos = 900;
 
         //slides controls
-        slidesTargetPos += (int) (-gamepad2.left_stick_y * 30);
+        slidesTargetPos += (int) (-gamepad1.left_stick_y * 30);
 
         slides.setTargetPosition(slidesTargetPos);
         slides.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         slides.setPower(1);
 
         // Read joystick input, right stick Y-axis controls the motor position
-        double joystickInput = -gamepad2.right_stick_y;
+        double joystickInput = -gamepad1.left_stick_x;
 
             //joint controls
             slidesJointTargetPos += (int) (joystickInput * 20);
@@ -204,29 +213,29 @@ public class TeleOp1_18 extends LinearOpMode {
             }
 
             // Check for button presses to set predefined positions
-            if (gamepad2.dpad_down) {    //set arm and slides position for intaking/init
+            if (gamepad1.dpad_down) {    //set arm and slides position for intaking/init
                 setpoint = armInitPos;
                 slidesJointTargetPos = armInitPos;
                 slidesTargetPos = 0;
                 pidEnabled = true;
-                jointServoPos = 1;
+                jointServoPos = 0.5;
                 spinnyPos = spinnyNormalPos;
 
-            } else if (gamepad2.dpad_up) {    //arm and slide position for high basket
+            } else if (gamepad1.dpad_up) {    //arm and slide position for high basket
                 setpoint = armBasketPos;
                 slidesJointTargetPos = armBasketPos;
                 pidEnabled = true;
                 slidesTargetPos = 3950;
-                jointServoPos = 1;
+                jointServoPos = 0.5;
                 spinnyPos = spinnyNormalPos;
 
-            } else if (gamepad2.dpad_left) {   //arm and slide pos for high chamber
+            } else if (gamepad1.dpad_left) {   //arm and slide pos for high chamber
                 setpoint = armChamberPos;
                 slidesJointTargetPos = armChamberPos;
                 slidesTargetPos = 675;
                 pidEnabled = true;
                 spinnyPos = spinnyNormalPos;
-            } else if (gamepad2.dpad_right) {   //arm and slide pos for Sub intaking
+            } else if (gamepad1.dpad_right) {   //arm and slide pos for Sub intaking
                 setpoint = armDrivingAroundPos;
                 slidesJointTargetPos = armDrivingAroundPos;
                 pidEnabled = true;
@@ -240,21 +249,28 @@ public class TeleOp1_18 extends LinearOpMode {
                 }
             }
 
-            if (gamepad2.x){
+            if (gamepad1.x){
                 jointServoPos += 0.05;
             }
-            else if (gamepad2.y){
+            else if (gamepad1.y){
                 jointServoPos -= 0.05;
             }
+            if (jointServoPos < 0)
+                    jointServoPos = 0;
+            if (jointServoPos > 1)
+                jointServoPos = 1;
             joint.setPosition(jointServoPos);
 
-            spinnyPos += (gamepad2.left_trigger/15) - (gamepad2.right_trigger/15);
+            if (gamepad1.start)
+                spinnyPos -= 0.05;
+            else if (gamepad1.back)
+                spinnyPos +=0.05;
             if (spinnyPos > 1)
                     spinnyPos = 1;
             else if (spinnyPos < 0)
                 spinnyPos = 0;
 
-            if(gamepad2.b){
+            if(gamepad1.b){
                 spinnyPos = spinnyNormalPos;
             }
 
@@ -275,7 +291,7 @@ public class TeleOp1_18 extends LinearOpMode {
             telemetry.update();
 
             // Toggle claw opening/closing when 'A' button is pressed
-            boolean currentAState = gamepad2.a;
+            boolean currentAState = gamepad1.a;
             if (currentAState && !previousAState) {
                 // Toggle the open/close state
                 isOpen = !isOpen;
@@ -289,13 +305,13 @@ public class TeleOp1_18 extends LinearOpMode {
             // Update the previous state of the 'A' button
             previousAState = currentAState;
 
-            boolean currentLBState = gamepad2.left_bumper;
+            boolean currentLBState = gamepad1.left_bumper;
             if (currentLBState && !previousLBState) {
                 // Toggle the state of the claw's servo joint
                 isUp = !isUp;
 
                 if (isUp) {
-                    jointServoPos = 0;
+                    jointServoPos = 0.5;
                 } else {
                     jointServoPos = 1;
                 }

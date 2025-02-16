@@ -1,29 +1,28 @@
-package org.firstinspires.ftc.teamcode.LM5_Jan18;
+package org.firstinspires.ftc.teamcode.QualifierCode;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
+import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.acmerobotics.roadrunner.trajectory.constraints.MinVelocityConstraint;
 import com.acmerobotics.roadrunner.trajectory.constraints.TranslationalVelocityConstraint;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-
 import org.firstinspires.ftc.teamcode.RoadRunner05x.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.RoadRunner05x.trajectorysequence.TrajectorySequence;
 
 import java.util.Arrays;
 
-@Disabled
 @Autonomous
 @Config
-public class ObsAuto extends LinearOpMode {
+public class ObsAutoFinal extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
 
 
         SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
-        ArmSubOld slidesSubsystem = new ArmSubOld(hardwareMap, telemetry);
+        ArmSub slidesSubsystem = new ArmSub(hardwareMap, telemetry);
         Pose2d startPos = new Pose2d(-10, 63.5, Math.toRadians(270));
         drive.setPoseEstimate(startPos);
 
@@ -32,26 +31,28 @@ public class ObsAuto extends LinearOpMode {
                 .splineToConstantHeading(new Vector2d(-11, 42.5), Math.toRadians(270)) // to sub with first specimen
                 .addTemporalMarker(0.1, () -> {
                     slidesSubsystem.runArmToPos(1200,1);
-                    slidesSubsystem.setJoint(0.75);
+                    slidesSubsystem.setJoint(0.6);
                 })
                 .addTemporalMarker(0.25, () -> {
-                    slidesSubsystem.setSlides(2400);
+                    slidesSubsystem.setSlides(1875);
+                    slidesSubsystem.setJoint(0.7);
                 })
 
                 .setReversed(true)
-                .addTemporalMarker(1.75,() -> {
-                    slidesSubsystem.runArmToPos(800,0.75);
-                    slidesSubsystem.setSlides(2350);
+                .addTemporalMarker(1.5,() -> {
+                    slidesSubsystem.runArmToPos(700,0.7);
+                    slidesSubsystem.setSlides(1850);
+
                 })
-                .addTemporalMarker(2.6,() -> {
+                .addTemporalMarker(2,() -> {
                     slidesSubsystem.clawOpen();
-                    slidesSubsystem.setJoint(0.9);
+                    slidesSubsystem.setJoint(0.6);
                 })
-                .waitSeconds(0.7)
+                .waitSeconds(0.45)
                 .splineToConstantHeading(new Vector2d(-14,45), Math.toRadians(90)) //back up from sub
                 .splineToSplineHeading(new Pose2d(-32,35,Math.toRadians(0)),Math.toRadians(270)) // side of sub
-                .splineToConstantHeading(new Vector2d(-33,12),Math.toRadians(270)) //crosses sub leg
-                .splineToConstantHeading(new Vector2d(-43,7),Math.toRadians(90)) // back to line up with sample to push
+                .splineToConstantHeading(new Vector2d(-33,14),Math.toRadians(270)) //crosses sub leg
+                .splineToConstantHeading(new Vector2d(-43,12),Math.toRadians(90)) // back to line up with sample to push
 
                 .addTemporalMarker(2.7,() -> {
                     slidesSubsystem.setSlides(0);
@@ -61,22 +62,33 @@ public class ObsAuto extends LinearOpMode {
                     slidesSubsystem.runArmToPos(400,1);
                 })
 
+                .setVelConstraint(new MinVelocityConstraint(Arrays.asList(new TranslationalVelocityConstraint(32)))) // slow speed for plowing 1st sample in
+                .splineToConstantHeading(new Vector2d(-44,50),Math.toRadians(90)) // pushes 1st sample into obs
+                .strafeRight(38)
+                .back(8)
+                .strafeLeft(40)
+                .strafeRight(40)
+                .back(8)
+                .strafeLeft(40)
+                /*.splineToConstantHeading(new Vector2d(-45,48),Math.toRadians(270)) //moves back
+                .splineToConstantHeading(new Vector2d(-45,14),Math.toRadians(270)) //goes to 2nd
+                .splineToConstantHeading(new Vector2d(-50,13.5),Math.toRadians(90)) //line up with 2nd
+                .splineToConstantHeading(new Vector2d(-52,50),Math.toRadians(90)) //pushes 2nd in
+                .splineToConstantHeading(new Vector2d(-53,48),Math.toRadians(270)) //Moves back
+                .splineToConstantHeading(new Vector2d(-54,14),Math.toRadians(270)) //goes to 3rd
+                .splineToConstantHeading(new Vector2d(-55,15),Math.toRadians(90)) //line up with 3rd
+                .splineToConstantHeading(new Vector2d(-56,50),Math.toRadians(90)) //pushes 3rd in
 
-                .setVelConstraint(new MinVelocityConstraint(Arrays.asList(new TranslationalVelocityConstraint(35)))) // slow speed for plowing 1st sample in
-                .splineToConstantHeading(new Vector2d(-44,60),Math.toRadians(90)) // pushes 1st sample into obs
-                .resetConstraints()
-                .splineToConstantHeading (new Vector2d(-35,20),Math.toRadians(270)) //goes back near sub for 2nd sample
-                .splineToConstantHeading (new Vector2d(-50,5),Math.toRadians(90)) //lines up with 2nd sample
-                .setVelConstraint(new MinVelocityConstraint(Arrays.asList(new TranslationalVelocityConstraint(35)))) //slow speed for plowing 2nd one in
-                .splineToConstantHeading (new Vector2d(-51,60),Math.toRadians(90)) //pushes 2nd sample in
-                .resetConstraints()
-                .addTemporalMarker(11,() -> {
-                    slidesSubsystem.setJoint(1);
+                 */
+                /*.addTemporalMarker(11,() -> {
+                    slidesSubsystem.setJoint(0.5);
                     slidesSubsystem.runArmToPos(0,1);
                     slidesSubsystem.setSlides(0);
 
         }       )
                 .waitSeconds(5)
+
+                 */
 
                 /*
                 .splineToSplineHeading(new Pose2d(-50,40,Math.toRadians(90)),Math.toRadians(0))
@@ -120,11 +132,13 @@ public class ObsAuto extends LinearOpMode {
                  */
                 .build();
 
+
+
         //init
         slidesSubsystem.clawClose();
         slidesSubsystem.setJoint(1);
         slidesSubsystem.runArmToPos(300,1);
-        slidesSubsystem.spin(0.94);
+        slidesSubsystem.spin(0.61);
 
 
 

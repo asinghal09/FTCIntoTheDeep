@@ -18,8 +18,8 @@ public class ArmSub {
     private Servo claw, joint, spinny;
 
 
-    public static double clawOpenPos = 0.6;
-    public static double clawClosePos = 0.35;
+    public static double clawOpenPos = 0.9;
+    public static double clawClosePos = 0.63;
 
 
     public static double speedDivider = 3;
