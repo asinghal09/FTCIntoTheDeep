@@ -41,7 +41,7 @@ public class TeleOp3_2 extends LinearOpMode {
     public static double clawOpen = 0.9;
     public static double clawClose = 0.63;
 
-    public static double spinnyNormalPos = 0.61;
+    public static double spinnyNormalPos = 0.75;
 
     public static double spinnyPos = 0.5;
     public static double jointServoPos = 0.5;
@@ -71,7 +71,7 @@ public class TeleOp3_2 extends LinearOpMode {
     public static int armInitPos = 0;
     public static int armDrivingAroundPos = 450;
     public static int armBasketPos = 1650;
-    public static int armChamberPos = 1300;
+    public static int armChamberPos = 2000;
     public static int maxSlideJointPos = 1650;
     public static int minJointPos = 0;
 
@@ -232,9 +232,9 @@ public class TeleOp3_2 extends LinearOpMode {
             } else if (gamepad2.dpad_left) {   //arm and slide pos for high chamber
                 setpoint = armChamberPos;
                 slidesJointTargetPos = armChamberPos;
-                slidesTargetPos = 675;
+                slidesTargetPos = 800;
                 pidEnabled = true;
-                spinnyPos = spinnyNormalPos;
+                spinnyPos = 0.05;
             } else if (gamepad2.dpad_right) {   //arm and slide pos for Sub intaking
                 setpoint = armDrivingAroundPos;
                 slidesJointTargetPos = armDrivingAroundPos;

@@ -2,11 +2,9 @@ package org.firstinspires.ftc.teamcode.QualifierCode;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
-import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.acmerobotics.roadrunner.trajectory.constraints.MinVelocityConstraint;
 import com.acmerobotics.roadrunner.trajectory.constraints.TranslationalVelocityConstraint;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import org.firstinspires.ftc.teamcode.RoadRunner05x.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.RoadRunner05x.trajectorysequence.TrajectorySequence;
@@ -15,7 +13,7 @@ import java.util.Arrays;
 
 @Autonomous
 @Config
-public class ObsAutoFinal extends LinearOpMode {
+public class ObsAutoFast5 extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -62,24 +60,28 @@ public class ObsAutoFinal extends LinearOpMode {
                     slidesSubsystem.runArmToPos(400,1);
                 })
 
-                .setVelConstraint(new MinVelocityConstraint(Arrays.asList(new TranslationalVelocityConstraint(32)))) // slow speed for plowing 1st sample in
+                .setVelConstraint(new MinVelocityConstraint(Arrays.asList(new TranslationalVelocityConstraint(25)))) // slow speed for plowing 1st sample in
                 .splineToConstantHeading(new Vector2d(-44,50),Math.toRadians(90)) // pushes 1st sample into obs
+                /*
                 .strafeRight(38)
                 .back(8)
                 .strafeLeft(40)
                 .strafeRight(40)
                 .back(8)
                 .strafeLeft(40)
-                /*.splineToConstantHeading(new Vector2d(-45,48),Math.toRadians(270)) //moves back
-                .splineToConstantHeading(new Vector2d(-45,14),Math.toRadians(270)) //goes to 2nd
-                .splineToConstantHeading(new Vector2d(-50,13.5),Math.toRadians(90)) //line up with 2nd
-                .splineToConstantHeading(new Vector2d(-52,50),Math.toRadians(90)) //pushes 2nd in
-                .splineToConstantHeading(new Vector2d(-53,48),Math.toRadians(270)) //Moves back
-                .splineToConstantHeading(new Vector2d(-54,14),Math.toRadians(270)) //goes to 3rd
-                .splineToConstantHeading(new Vector2d(-55,15),Math.toRadians(90)) //line up with 3rd
-                .splineToConstantHeading(new Vector2d(-56,50),Math.toRadians(90)) //pushes 3rd in
 
                  */
+                .splineToConstantHeading(new Vector2d(-45,48),Math.toRadians(270)) //moves back
+                .splineToSplineHeading(new Pose2d(-42,20,Math.toRadians(0)),Math.toRadians(270)) //goes forward ish to halfway to 2nd
+                .splineToConstantHeading(new Vector2d(-50,12),Math.toRadians(90)) //line up with 2nd
+                .splineToConstantHeading(new Vector2d(-52,50),Math.toRadians(90)) //pushes 2nd in
+                .splineToConstantHeading(new Vector2d(-53,48),Math.toRadians(270)) //Moves back
+                .splineToSplineHeading(new Pose2d(-50,20,Math.toRadians(0)),Math.toRadians(270)) //goes forward ish to halfway to 3rd
+                .splineToConstantHeading(new Vector2d(-57,13),Math.toRadians(90)) //line up with 3rd
+                .splineToConstantHeading(new Vector2d(-58,50),Math.toRadians(90)) //pushes 3rd in
+
+
+                //old stuff - picking up 2nd from obs and stuff
                 /*.addTemporalMarker(11,() -> {
                     slidesSubsystem.setJoint(0.5);
                     slidesSubsystem.runArmToPos(0,1);

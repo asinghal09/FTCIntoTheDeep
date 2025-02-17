@@ -1,5 +1,4 @@
-package org.firstinspires.ftc.teamcode.testing;
-import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.telemetry;
+package org.firstinspires.ftc.teamcode.testing.camera;
 import org.opencv.imgproc.Moments;
 import org.openftc.easyopencv.*;
 import org.opencv.core.*;

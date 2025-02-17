@@ -41,10 +41,10 @@ public class TeleOp3_2OneController extends LinearOpMode {
     public static double clawOpen = 0.9;
     public static double clawClose = 0.63;
 
-    public static double spinnyNormalPos = 0.61;
+    public static double spinnyNormalPos = 0.75;
 
-    public static double spinnyPos = 0.5;
-    public static double jointServoPos = 0.5;
+    public static double spinnyPos = 0.75;
+    public static double jointServoPos = 1;
 
     public static double speedDivider = 2;
 
@@ -69,10 +69,10 @@ public class TeleOp3_2OneController extends LinearOpMode {
 
     // Predefined positions for the arm
     public static int armInitPos = 0;
-    public static int armDrivingAroundPos = 450;
+    public static int armDrivingAroundPos = 315;
     public static int armBasketPos = 1650;
-    public static int armChamberPos = 1300;
-    public static int maxSlideJointPos = 1650;
+    public static int armChamberPos = 2000;
+    public static int maxSlideJointPos = 2500;
     public static int minJointPos = 0;
 
     @Override
@@ -178,8 +178,10 @@ public class TeleOp3_2OneController extends LinearOpMode {
         //if (gamepad1.a)
             //webcam.alignOnce(drive, pipeline, slidesSub);
 
-        if (gamepad1.right_bumper)
-            slidesJointTargetPos = 900;
+        if (gamepad1.right_bumper) {
+            slidesJointTargetPos = 2500;
+            slidesTargetPos = 150;
+        }
 
         //slides controls
         slidesTargetPos += (int) (-gamepad1.left_stick_y * 30);
@@ -214,34 +216,31 @@ public class TeleOp3_2OneController extends LinearOpMode {
 
             // Check for button presses to set predefined positions
             if (gamepad1.dpad_down) {    //set arm and slides position for intaking/init
-                setpoint = armInitPos;
                 slidesJointTargetPos = armInitPos;
                 slidesTargetPos = 0;
-                pidEnabled = true;
                 jointServoPos = 0.5;
                 spinnyPos = spinnyNormalPos;
 
             } else if (gamepad1.dpad_up) {    //arm and slide position for high basket
-                setpoint = armBasketPos;
                 slidesJointTargetPos = armBasketPos;
-                pidEnabled = true;
                 slidesTargetPos = 3950;
                 jointServoPos = 0.5;
                 spinnyPos = spinnyNormalPos;
 
             } else if (gamepad1.dpad_left) {   //arm and slide pos for high chamber
-                setpoint = armChamberPos;
                 slidesJointTargetPos = armChamberPos;
-                slidesTargetPos = 675;
-                pidEnabled = true;
-                spinnyPos = spinnyNormalPos;
-            } else if (gamepad1.dpad_right) {   //arm and slide pos for Sub intaking
-                setpoint = armDrivingAroundPos;
-                slidesJointTargetPos = armDrivingAroundPos;
-                pidEnabled = true;
+                slidesTargetPos = 800;
+                spinnyPos = 0.05;
                 jointServoPos = 0;
+            } else if (gamepad1.dpad_right) {   //arm and slide pos for Sub intaking
+                slidesJointTargetPos = armDrivingAroundPos;
+                jointServoPos = 0.4;
                 spinnyPos = spinnyNormalPos;
+                slidesTargetPos = 330;
             }
+
+            if (slidesTargetPos < 500 && jointServoPos < 0.25)
+                    jointServoPos = 0.25;
 
             if (slidesJointTargetPos > 0 && slidesJointTargetPos <850) {
                 if (slidesTargetPos > 3000) {
