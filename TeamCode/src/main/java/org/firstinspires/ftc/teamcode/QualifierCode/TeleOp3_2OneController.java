@@ -9,6 +9,9 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.robotcore.hardware.DistanceSensor;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+
 
 import org.firstinspires.ftc.teamcode.RoadRunner05x.drive.SampleMecanumDrive;
 
@@ -27,6 +30,8 @@ public class TeleOp3_2OneController extends LinearOpMode {
     DcMotorEx slides;
     Servo claw, joint, spinny;
 
+    DistanceSensor distanceSensor;
+
     ElapsedTime timer;
     //DigitalChannel touchSensor;
 
@@ -35,13 +40,14 @@ public class TeleOp3_2OneController extends LinearOpMode {
     boolean isOpen = false;
     boolean previousAState = false;
 
+    boolean delivering = false;
 
     boolean isUp = false;               //for toggling joint up vs down position based on left bumper
     boolean previousLBState = false;
     public static double clawOpen = 0.9;
     public static double clawClose = 0.63;
 
-    public static double spinnyNormalPos = 0.75;
+    public static double spinnyNormalPos = 0.68;
 
     public static double spinnyPos = 0.75;
     public static double jointServoPos = 1;
@@ -92,8 +98,7 @@ public class TeleOp3_2OneController extends LinearOpMode {
 
         slidesJoint = hardwareMap.get(DcMotorEx.class, "slidesJoint");
         slides = hardwareMap.get(DcMotorEx.class, "slides");
-        //touchSensor = hardwareMap.get(DigitalChannel.class, "touchSensor");
-        //touchSensor.setMode(DigitalChannel.Mode.INPUT);
+        distanceSensor = hardwareMap.get(DistanceSensor.class, "distanceSensor");
 
         timer = new ElapsedTime();
 
@@ -128,70 +133,72 @@ public class TeleOp3_2OneController extends LinearOpMode {
 
         while (opModeIsActive()) {
 
-        if(timer.seconds() > 15){
-            if (slidesJointTargetPos > maxSlideJointPos) {          //joint hardstops
-                slidesJointTargetPos = maxSlideJointPos;
-            } else
-            if (slidesJointTargetPos <0){
-                slidesJointTargetPos = 0;
-            }
-            slidesJoint.setTargetPosition(slidesJointTargetPos);
-            slidesJoint.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            if(timer.seconds() > 15){
+                if (slidesJointTargetPos > maxSlideJointPos) {          //joint hardstops
+                    slidesJointTargetPos = maxSlideJointPos;
+                } else
+                if (slidesJointTargetPos <0){
+                    slidesJointTargetPos = 0;
+                }
+                slidesJoint.setTargetPosition(slidesJointTargetPos);
+                slidesJoint.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
-            if (slidesTargetPos < 0) //slides hardstops
-                slidesTargetPos = 0;
-            else if(slidesTargetPos>maxSlidePos)
-                slidesTargetPos = maxSlidePos;
+                if (slidesTargetPos < 0) //slides hardstops
+                    slidesTargetPos = 0;
+                else if(slidesTargetPos>maxSlidePos)
+                    slidesTargetPos = maxSlidePos;
+
+                slides.setTargetPosition(slidesTargetPos);
+                slides.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                slides.setPower(1);
+            }
+
+            double driving = -gamepad1.right_stick_y; // Forward/backward
+            double turning = gamepad1.right_stick_x; // Turning
+            double strafing = gamepad1.right_trigger - gamepad1.left_trigger; // Strafing
+
+            // Combine inputs for each motor
+            double frontLeftPower = driving + turning + strafing;
+            double frontRightPower = driving - turning - strafing;
+            double backLeftPower = driving + turning - strafing;
+            double backRightPower = driving - turning + strafing;
+
+            // Normalize powers to keep them within -1.0 to 1.0
+            double maxPower = Math.max(1.0, Math.abs(frontLeftPower));
+            maxPower = Math.max(maxPower, Math.abs(frontRightPower));
+            maxPower = Math.max(maxPower, Math.abs(backLeftPower));
+            maxPower = Math.max(maxPower, Math.abs(backRightPower));
+
+            frontLeftPower /= maxPower;
+            frontRightPower /= maxPower;
+            backLeftPower /= maxPower;
+            backRightPower /= maxPower;
+
+            // Set motor powers
+            frontLeft.setPower(frontLeftPower);
+            frontRight.setPower(frontRightPower);
+            backLeft.setPower(backLeftPower);
+            backRight.setPower(backRightPower);
+
+            //if (gamepad1.a)
+                //webcam.alignOnce(drive, pipeline, slidesSub);
+            /*
+            if (gamepad1.right_bumper) {
+                slidesJointTargetPos = 2500;
+                slidesTargetPos = 150;
+            }
+
+             */
+
+            //slides controls
+            slidesTargetPos += (int) (-gamepad1.left_stick_y * 30);
 
             slides.setTargetPosition(slidesTargetPos);
             slides.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             slides.setPower(1);
-        }
 
-        double driving = -gamepad1.right_stick_y*0.75; // Forward/backward
-        double turning = gamepad1.right_stick_x * 0.5; // Turning
-        double strafing = gamepad1.right_trigger - gamepad1.left_trigger; // Strafing
-
-        // Combine inputs for each motor
-        double frontLeftPower = driving + turning + strafing;
-        double frontRightPower = driving - turning - strafing;
-        double backLeftPower = driving + turning - strafing;
-        double backRightPower = driving - turning + strafing;
-
-        // Normalize powers to keep them within -1.0 to 1.0
-        double maxPower = Math.max(1.0, Math.abs(frontLeftPower));
-        maxPower = Math.max(maxPower, Math.abs(frontRightPower));
-        maxPower = Math.max(maxPower, Math.abs(backLeftPower));
-        maxPower = Math.max(maxPower, Math.abs(backRightPower));
-
-        frontLeftPower /= maxPower;
-        frontRightPower /= maxPower;
-        backLeftPower /= maxPower;
-        backRightPower /= maxPower;
-
-        // Set motor powers
-        frontLeft.setPower(frontLeftPower);
-        frontRight.setPower(frontRightPower);
-        backLeft.setPower(backLeftPower);
-        backRight.setPower(backRightPower);
-
-        //if (gamepad1.a)
-            //webcam.alignOnce(drive, pipeline, slidesSub);
-
-        if (gamepad1.right_bumper) {
-            slidesJointTargetPos = 2500;
-            slidesTargetPos = 150;
-        }
-
-        //slides controls
-        slidesTargetPos += (int) (-gamepad1.left_stick_y * 30);
-
-        slides.setTargetPosition(slidesTargetPos);
-        slides.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        slides.setPower(1);
-
-        // Read joystick input, right stick Y-axis controls the motor position
-        double joystickInput = -gamepad1.left_stick_x;
+            // Read joystick input, right stick Y-axis controls the motor position
+            double joystickInput = -gamepad1.left_stick_x;
 
             //joint controls
             slidesJointTargetPos += (int) (joystickInput * 20);
@@ -275,19 +282,6 @@ public class TeleOp3_2OneController extends LinearOpMode {
 
             spinny.setPosition(spinnyPos);
 
-            // Send telemetry to the dashboard
-            telemetry.addData("Joystick Input", joystickInput);
-            //telemetry.addData("PID Enabled", pidEnabled);
-            //telemetry.addData("Setpoint", setpoint);
-            telemetry.addData("Joint Target", slidesJointTargetPos);
-            telemetry.addData("Slides Joint Pos ", slidesJoint.getCurrentPosition());
-            telemetry.addData("Slides Pos", slides.getCurrentPosition());
-            telemetry.addData("Slides Target Position", slidesTargetPos);
-            telemetry.addData("Spinny Target Pos",spinnyPos);
-            telemetry.addData("Spinny Actual Pos", spinny.getPosition());
-            telemetry.addData("Joint Target Pos",jointServoPos);
-            telemetry.addData("Joint Actual Pos", joint.getPosition());
-            telemetry.update();
 
             // Toggle claw opening/closing when 'A' button is pressed
             boolean currentAState = gamepad1.a;
@@ -317,6 +311,57 @@ public class TeleOp3_2OneController extends LinearOpMode {
             }
             // Update the previous state of the 'LB' button
             previousLBState = currentLBState;
+
+        if (gamepad1.right_bumper)
+            delivering = true;
+
+
+        //Distance sensor stuff
+        double distance = distanceSensor.getDistance(DistanceUnit.CM);
+
+        if(delivering){
+            while(distance > 20){
+                frontLeftPower = -0.25;
+                backLeftPower = -0.25;
+                frontRightPower = -0.25;
+                backRightPower = -0.25;
+
+                // Set motor powers
+                frontLeft.setPower(frontLeftPower);
+                frontRight.setPower(frontRightPower);
+                backLeft.setPower(backLeftPower);
+                backRight.setPower(backRightPower);
+
+                distance = distanceSensor.getDistance(DistanceUnit.CM);
+            }
+
+
+
+            frontLeft.setPower(0);
+            backLeft.setPower(0);
+            frontRight.setPower(0);
+            backRight.setPower(0);
+            delivering = false;
+
+        }
+
+
+
+            //telemetry.addData("Joystick Input", joystickInput);
+            telemetry = FtcDashboard.getInstance().getTelemetry();
+            telemetry.addData("Joint Target", slidesJointTargetPos);
+            telemetry.addData("Slides Joint Pos ", slidesJoint.getCurrentPosition());
+            telemetry.addData("Slides Target Position", slidesTargetPos);
+            telemetry.addData("Slides Pos", slides.getCurrentPosition());
+            telemetry.addData("Spinny Target Pos",spinnyPos);
+            telemetry.addData("Spinny Actual Pos", spinny.getPosition());
+            telemetry.addData("Joint Target Pos",jointServoPos);
+            telemetry.addData("Joint Actual Pos", joint.getPosition());
+            telemetry.addData("distance", distance);
+            telemetry.addData("delivery mode activated", delivering);
+            telemetry.update();
+
+
         }
     }
 }

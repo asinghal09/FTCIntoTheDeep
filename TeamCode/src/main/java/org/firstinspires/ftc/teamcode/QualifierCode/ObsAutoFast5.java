@@ -80,58 +80,19 @@ public class ObsAutoFast5 extends LinearOpMode {
                 .splineToConstantHeading(new Vector2d(-57,13),Math.toRadians(90)) //line up with 3rd
                 .splineToConstantHeading(new Vector2d(-58,50),Math.toRadians(90)) //pushes 3rd in
 
-
-                //old stuff - picking up 2nd from obs and stuff
-                /*.addTemporalMarker(11,() -> {
-                    slidesSubsystem.setJoint(0.5);
-                    slidesSubsystem.runArmToPos(0,1);
-                    slidesSubsystem.setSlides(0);
-
-        }       )
-                .waitSeconds(5)
-
-                 */
-
                 /*
-                .splineToSplineHeading(new Pose2d(-50,40,Math.toRadians(90)),Math.toRadians(0))
-                .waitSeconds(0.5)
-                .forward(10)
-                .waitSeconds(2)
+                .splineToConstantHeading(new Vector2d(-45,48),Math.toRadians(270))
+                .splineToConstantHeading(new Vector2d(-46,20),Math.toRadians(270))
+                .splineToConstantHeading(new Vector2d(-48,12),Math.toRadians(90))
+                .splineToConstantHeading(new Vector2d(-52,50),Math.toRadians(90)) //pushes 2nd in
+                .splineToConstantHeading(new Vector2d(-53,48),Math.toRadians(270))
+                .splineToConstantHeading(new Vector2d(-54,20),Math.toRadians(270))
+                .splineToConstantHeading(new Vector2d(-57,13),Math.toRadians(90))
+                .splineToConstantHeading(new Vector2d(-58,50),Math.toRadians(90)) //pushes 3rd in
 
-                .addTemporalMarker(11,() -> {
-                    slidesSubsystem.setJoint(0);
-                })
-                .addTemporalMarker(11,() -> {
-                    slidesSubsystem.setSlides(1000);
-                })
-                .addTemporalMarker(13.5,() -> {
-                    slidesSubsystem.clawClose();
-                })
-                .addTemporalMarker(14,() -> {
+                */
 
-                    slidesSubsystem.runArmToPos(1300,1);
-                    slidesSubsystem.setSlides(675);
-                })
-                .splineToSplineHeading(new Pose2d(7, 32, Math.toRadians(270)), Math.toRadians(270)) //to sub with                .waitSeconds(1)
-                .addTemporalMarker(18,() -> {
 
-                    slidesSubsystem.runArmToPos(950,0.75);
-                })
-                .waitSeconds(5)
-                /*.back(20)
-                .addTemporalMarker(25,() -> {
-
-                    slidesSubsystem.clawOpen();
-                })
-                .waitSeconds(1)
-                .addTemporalMarker(26,() -> {
-
-                    slidesSubsystem.runArmToPos(0,1);
-                    slidesSubsystem.setSlides(0);
-                })
-                .splineToConstantHeading(new Vector2d(-50,40),Math.toRadians(180))
-
-                 */
                 .build();
 
 
