@@ -15,7 +15,7 @@ import java.util.Arrays;
 
 @Autonomous
 @Config
-public class ObsAutoBigLoop extends LinearOpMode {
+public class ObsAuto5specimen extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {

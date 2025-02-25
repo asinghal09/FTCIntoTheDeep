@@ -42,12 +42,15 @@ public class TeleOp3_2OneController extends LinearOpMode {
 
     boolean delivering = false;
 
+    public static double slowSpeed = 0.25;
+
     boolean isUp = false;               //for toggling joint up vs down position based on left bumper
     boolean previousLBState = false;
     public static double clawOpen = 0.9;
     public static double clawClose = 0.63;
 
     public static double spinnyNormalPos = 0.68;
+
 
     public static double spinnyPos = 0.75;
     public static double jointServoPos = 1;
@@ -58,6 +61,8 @@ public class TeleOp3_2OneController extends LinearOpMode {
     public static int maxSlidePos = 4400;
     public static int minSlidePos = 500;
 
+    public static double drivingMult = 0.75;
+    public static double turningMult = 0.8;
 
     // PID coefficients
     public static double Kp = 0.0001;   // Proportional Gain
@@ -75,7 +80,7 @@ public class TeleOp3_2OneController extends LinearOpMode {
 
     // Predefined positions for the arm
     public static int armInitPos = 0;
-    public static int armDrivingAroundPos = 315;
+    public static int armDrivingAroundPos = 450;
     public static int armBasketPos = 1650;
     public static int armChamberPos = 2000;
     public static int maxSlideJointPos = 2500;
@@ -145,7 +150,7 @@ public class TeleOp3_2OneController extends LinearOpMode {
 
                 if (slidesTargetPos < 0) //slides hardstops
                     slidesTargetPos = 0;
-                else if(slidesTargetPos>maxSlidePos)
+                else if(slidesTargetPos > maxSlidePos)
                     slidesTargetPos = maxSlidePos;
 
                 slides.setTargetPosition(slidesTargetPos);
@@ -241,18 +246,25 @@ public class TeleOp3_2OneController extends LinearOpMode {
                 jointServoPos = 0;
             } else if (gamepad1.dpad_right) {   //arm and slide pos for Sub intaking
                 slidesJointTargetPos = armDrivingAroundPos;
-                jointServoPos = 0.4;
+                jointServoPos = 0.45;
                 spinnyPos = spinnyNormalPos;
                 slidesTargetPos = 330;
             }
 
+            /*
             if (slidesTargetPos < 500 && jointServoPos < 0.25)
                     jointServoPos = 0.25;
+
+             */
 
             if (slidesJointTargetPos > 0 && slidesJointTargetPos <850) {
                 if (slidesTargetPos > 3000) {
                     slidesTargetPos = 3000;
                 }
+            }
+
+            if (Math.abs(slides.getCurrentPosition() - slidesTargetPos) <= 10){
+                slides.setPower(0.25);
             }
 
             if (gamepad1.x){
@@ -320,11 +332,11 @@ public class TeleOp3_2OneController extends LinearOpMode {
         double distance = distanceSensor.getDistance(DistanceUnit.CM);
 
         if(delivering){
-            while(distance > 20){
-                frontLeftPower = -0.25;
-                backLeftPower = -0.25;
-                frontRightPower = -0.25;
-                backRightPower = -0.25;
+            while(distance > 25){
+                frontLeftPower = -slowSpeed;
+                backLeftPower = -slowSpeed;
+                frontRightPower = -slowSpeed;
+                backRightPower = -slowSpeed;
 
                 // Set motor powers
                 frontLeft.setPower(frontLeftPower);
@@ -335,13 +347,14 @@ public class TeleOp3_2OneController extends LinearOpMode {
                 distance = distanceSensor.getDistance(DistanceUnit.CM);
             }
 
-
-
             frontLeft.setPower(0);
             backLeft.setPower(0);
             frontRight.setPower(0);
             backRight.setPower(0);
             delivering = false;
+
+            slidesJointTargetPos = 2500;
+            slidesTargetPos = 225;
 
         }
 
@@ -353,6 +366,7 @@ public class TeleOp3_2OneController extends LinearOpMode {
             telemetry.addData("Slides Joint Pos ", slidesJoint.getCurrentPosition());
             telemetry.addData("Slides Target Position", slidesTargetPos);
             telemetry.addData("Slides Pos", slides.getCurrentPosition());
+            telemetry.addData("slides power", slides.getPower());
             telemetry.addData("Spinny Target Pos",spinnyPos);
             telemetry.addData("Spinny Actual Pos", spinny.getPosition());
             telemetry.addData("Joint Target Pos",jointServoPos);

@@ -8,7 +8,10 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+
 
 import org.firstinspires.ftc.teamcode.RoadRunner05x.drive.SampleMecanumDrive;
 
@@ -27,14 +30,18 @@ public class TeleOp3_2 extends LinearOpMode {
     DcMotorEx slides;
     Servo claw, joint, spinny;
 
+    DistanceSensor distanceSensor;
     ElapsedTime timer;
-    //DigitalChannel touchSensor;
+    ElapsedTime basketTimer;
+
+    private boolean previousBasketState = false;
 
     private boolean moveForward = false;
 
     boolean isOpen = false;
     boolean previousAState = false;
 
+    boolean delivering = false;
 
     boolean isUp = false;               //for toggling joint up vs down position based on left bumper
     boolean previousLBState = false;
@@ -52,6 +59,8 @@ public class TeleOp3_2 extends LinearOpMode {
     public static int maxSlidePos = 4400;
     public static int minSlidePos = 500;
 
+    public static double drivingMult = 0.75;
+    public static double turningMult = 0.8;
 
     // PID coefficients
     public static double Kp = 0.0001;   // Proportional Gain
@@ -68,8 +77,8 @@ public class TeleOp3_2 extends LinearOpMode {
     private long lastTime;
 
     // Predefined positions for the arm
-    public static int armInitPos = 0;
-    public static int armDrivingAroundPos = 315;
+    public static int armInitPos = 300;
+    public static int armDrivingAroundPos = 450;
     public static int armBasketPos = 1650;
     public static int armChamberPos = 2000;
     public static int maxSlideJointPos = 2500;
@@ -92,10 +101,11 @@ public class TeleOp3_2 extends LinearOpMode {
 
         slidesJoint = hardwareMap.get(DcMotorEx.class, "slidesJoint");
         slides = hardwareMap.get(DcMotorEx.class, "slides");
-        //touchSensor = hardwareMap.get(DigitalChannel.class, "touchSensor");
-        //touchSensor.setMode(DigitalChannel.Mode.INPUT);
+        distanceSensor = hardwareMap.get(DistanceSensor.class, "distanceSensor");
+
 
         timer = new ElapsedTime();
+        basketTimer = new ElapsedTime();
 
         slidesJoint.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         slidesJoint.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -140,7 +150,7 @@ public class TeleOp3_2 extends LinearOpMode {
 
                 if (slidesTargetPos < 0) //slides hardstops
                     slidesTargetPos = 0;
-                else if(slidesTargetPos>maxSlidePos)
+                else if(slidesTargetPos > maxSlidePos)
                     slidesTargetPos = maxSlidePos;
 
                 slides.setTargetPosition(slidesTargetPos);
@@ -148,8 +158,8 @@ public class TeleOp3_2 extends LinearOpMode {
                 slides.setPower(1);
             }
 
-            double driving = -gamepad1.right_stick_y*0.75; // Forward/backward
-            double turning = gamepad1.left_stick_x * 0.5; // Turning
+            double driving = -gamepad1.right_stick_y * drivingMult; // Forward/backward
+            double turning = gamepad1.left_stick_x * turningMult; // Turning
             double strafing = gamepad1.right_trigger - gamepad1.left_trigger; // Strafing
 
             // Combine inputs for each motor
@@ -178,13 +188,16 @@ public class TeleOp3_2 extends LinearOpMode {
             //if (gamepad1.a)
             //webcam.alignOnce(drive, pipeline, slidesSub);
 
+            /*
             if (gamepad2.right_bumper) {
                 slidesJointTargetPos = 2500;
                 slidesTargetPos = 150;
             }
 
+             */
+
             //slides controls
-            slidesTargetPos += (int) (-gamepad2.left_stick_y * 30);
+            slidesTargetPos += (int) (-gamepad2.left_stick_y * 50);
 
             slides.setTargetPosition(slidesTargetPos);
             slides.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -194,7 +207,7 @@ public class TeleOp3_2 extends LinearOpMode {
             double joystickInput = -gamepad2.right_stick_y;
 
             //joint controls
-            slidesJointTargetPos += (int) (joystickInput * 20);
+            slidesJointTargetPos += (int) (joystickInput * 50);
 
             slidesJoint.setTargetPosition(slidesJointTargetPos);
             slidesJoint.setPower(0.5);
@@ -218,17 +231,29 @@ public class TeleOp3_2 extends LinearOpMode {
 
             // Check for button presses to set predefined positions
             if (gamepad2.dpad_down) {    //set arm and slides position for intaking/init
-                slidesJointTargetPos = armInitPos;
-                slidesTargetPos = 0;
-                jointServoPos = 0.5;
-                spinnyPos = spinnyNormalPos;
+                if (previousBasketState){
+                    previousBasketState = false;
+                    basketTimer.reset();
+                    slidesTargetPos = 0;
+                    jointServoPos = 0.5;
+                    spinnyPos = spinnyNormalPos;
+                    if(basketTimer.seconds() > 2){
+                        slidesJointTargetPos = armInitPos;
+                    }
+                }
+                else {
+                    slidesJointTargetPos = armInitPos;
+                    slidesTargetPos = 0;
+                    jointServoPos = 0.5;
+                    spinnyPos = spinnyNormalPos;
+                }
 
             } else if (gamepad2.dpad_up) {    //arm and slide position for high basket
                 slidesJointTargetPos = armBasketPos;
                 slidesTargetPos = 3950;
                 jointServoPos = 0.5;
                 spinnyPos = spinnyNormalPos;
-
+                previousBasketState = true;
             } else if (gamepad2.dpad_left) {   //arm and slide pos for high chamber
                 slidesJointTargetPos = armChamberPos;
                 slidesTargetPos = 800;
@@ -236,19 +261,24 @@ public class TeleOp3_2 extends LinearOpMode {
                 jointServoPos = 0;
             } else if (gamepad2.dpad_right) {   //arm and slide pos for Sub intaking
                 slidesJointTargetPos = armDrivingAroundPos;
-                jointServoPos = 0.4;
+                jointServoPos = 0.45;
                 spinnyPos = spinnyNormalPos;
                 slidesTargetPos = 330;
             }
 
-            if (slidesTargetPos < 500 && jointServoPos < 0.25)
-                jointServoPos = 0.25;
-
             if (slidesJointTargetPos > 0 && slidesJointTargetPos <850) {
-                if (slidesTargetPos > 3000) {
-                    slidesTargetPos = 3000;
+                if (slidesTargetPos > 1800) {
+                    slidesTargetPos = 1800;
                 }
             }
+
+            //if the joint servo is open, then the hardstop for the slides should be no more than 1470
+
+
+            if (Math.abs(slides.getCurrentPosition() - slidesTargetPos) <= 10){
+                slides.setPower(0.25);
+            }
+
 
             if (gamepad2.x){
                 jointServoPos += 0.05;
@@ -278,13 +308,14 @@ public class TeleOp3_2 extends LinearOpMode {
             spinny.setPosition(spinnyPos);
 
             // Send telemetry to the dashboard
-            telemetry.addData("Joystick Input", joystickInput);
+            //telemetry.addData("Joystick Input", joystickInput);
             //telemetry.addData("PID Enabled", pidEnabled);
             //telemetry.addData("Setpoint", setpoint);
             telemetry.addData("Joint Target", slidesJointTargetPos);
             telemetry.addData("Slides Joint Pos ", slidesJoint.getCurrentPosition());
             telemetry.addData("Slides Pos", slides.getCurrentPosition());
             telemetry.addData("Slides Target Position", slidesTargetPos);
+            telemetry.addData("slides power", slides.getPower());
             telemetry.addData("Spinny Target Pos",spinnyPos);
             telemetry.addData("Spinny Actual Pos", spinny.getPosition());
             telemetry.addData("Joint Target Pos",jointServoPos);
@@ -319,6 +350,42 @@ public class TeleOp3_2 extends LinearOpMode {
             }
             // Update the previous state of the 'LB' button
             previousLBState = currentLBState;
+
+            if (gamepad2.right_bumper)
+                delivering = true;
+
+
+            //Distance sensor stuff
+            double distance = distanceSensor.getDistance(DistanceUnit.CM);
+
+            if(delivering){
+
+                while(distance > 25){
+                    frontLeftPower = -0.4;
+                    backLeftPower = -0.4;
+                    frontRightPower = -0.4;
+                    backRightPower = -0.4;
+
+                    // Set motor powers
+                    frontLeft.setPower(frontLeftPower);
+                    frontRight.setPower(frontRightPower);
+                    backLeft.setPower(backLeftPower);
+                    backRight.setPower(backRightPower);
+
+                    distance = distanceSensor.getDistance(DistanceUnit.CM);
+
+                }
+
+                frontLeft.setPower(0);
+                backLeft.setPower(0);
+                frontRight.setPower(0);
+                backRight.setPower(0);
+                delivering = false;
+
+                slidesJointTargetPos = 2300;
+                slidesTargetPos = 225;
+            }
+
         }
     }
 }
