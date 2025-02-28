@@ -28,20 +28,20 @@ public class ObsAutoBigLoop4 extends LinearOpMode {
 
 
         TrajectorySequence test = drive.trajectorySequenceBuilder(startPos)
-                .splineToConstantHeading(new Vector2d(-10.5, 42.5), Math.toRadians(270)) // to sub with first specimen
+                .splineToConstantHeading(new Vector2d(-10.5, 38), Math.toRadians(270)) // to sub with first specimen
                 .addTemporalMarker(0.1, () -> {
-                    slidesSubsystem.runArmToPos(1200,1);
+                    slidesSubsystem.runArmToPos(1420,1);
 
                 })
                 .addTemporalMarker(0.25, () -> {
-                    slidesSubsystem.setSlides(1875);
-                    slidesSubsystem.setJoint(0.5);
+                    slidesSubsystem.setSlides(1130);
+                    slidesSubsystem.setJoint(1);
                 })
 
                 .setReversed(true)
                 .addTemporalMarker(1.5,() -> {
-                    slidesSubsystem.runArmToPos(700,0.6);
-                    slidesSubsystem.setSlides(1850);
+
+                    slidesSubsystem.setSlides(200);
 
                 })
                 .addTemporalMarker(2,() -> {

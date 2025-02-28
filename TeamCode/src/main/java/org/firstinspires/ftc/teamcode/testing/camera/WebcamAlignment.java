@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.testing.camera;
 
 import com.acmerobotics.dashboard.FtcDashboard;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
@@ -17,7 +18,7 @@ import org.firstinspires.ftc.teamcode.QualifierCode.ArmSub;
 
 import java.util.Arrays;
 
-
+@Disabled
 @TeleOp(name = "WebcamAlignment", group = "Testing")
 public class WebcamAlignment extends LinearOpMode {
     private OpenCvCamera webcam;

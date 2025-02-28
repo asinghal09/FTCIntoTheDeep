@@ -8,18 +8,24 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
+import com.qualcomm.robotcore.util.ElapsedTime;
+
+import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 
 import org.firstinspires.ftc.teamcode.RoadRunner05x.drive.SampleMecanumDrive;
+import org.firstinspires.ftc.teamcode.testing.camera.RotatingPipeline;
+import org.openftc.easyopencv.OpenCvCamera;
+import org.openftc.easyopencv.OpenCvCameraFactory;
+import org.openftc.easyopencv.OpenCvCameraRotation;
 
 
 @Config
 @TeleOp
 
-public class TeleOp3_2OneController extends LinearOpMode {
+public class BlueTeleOp3_2 extends LinearOpMode {
 
     DcMotor frontLeft;
     DcMotor frontRight;
@@ -31,9 +37,14 @@ public class TeleOp3_2OneController extends LinearOpMode {
     Servo claw, joint, spinny;
 
     DistanceSensor distanceSensor;
-
     ElapsedTime timer;
-    //DigitalChannel touchSensor;
+    ElapsedTime basketTimer;
+
+    OpenCvCamera camera;
+    BlueSamplePipeline bluePipeline;
+    YellowSamplePipeline yellowPipeline;
+
+    private boolean previousBasketState = false;
 
     private boolean moveForward = false;
 
@@ -42,15 +53,12 @@ public class TeleOp3_2OneController extends LinearOpMode {
 
     boolean delivering = false;
 
-    public static double slowSpeed = 0.25;
-
     boolean isUp = false;               //for toggling joint up vs down position based on left bumper
     boolean previousLBState = false;
-    public static double clawOpen = 0.67;
-    public static double clawClose = 0.43;
+    public static double clawOpen = 0.65;
+    public static double clawClose = 0.41;
 
-    public static double spinnyNormalPos = 0.68;
-
+    public static double spinnyNormalPos = 0.75;
 
     public static double spinnyPos = 0.75;
     public static double jointServoPos = 1;
@@ -79,9 +87,9 @@ public class TeleOp3_2OneController extends LinearOpMode {
     private long lastTime;
 
     // Predefined positions for the arm
-    public static int armInitPos = 0;
+    public static int armInitPos = 300;
     public static int armDrivingAroundPos = 450;
-    public static int armBasketPos = 1650;
+    public static int armBasketPos = 1850;
     public static int armChamberPos = 2000;
     public static int maxSlideJointPos = 2500;
     public static int minJointPos = 0;
@@ -105,7 +113,9 @@ public class TeleOp3_2OneController extends LinearOpMode {
         slides = hardwareMap.get(DcMotorEx.class, "slides");
         distanceSensor = hardwareMap.get(DistanceSensor.class, "distanceSensor");
 
+
         timer = new ElapsedTime();
+        basketTimer = new ElapsedTime();
 
         slidesJoint.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         slidesJoint.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -121,14 +131,39 @@ public class TeleOp3_2OneController extends LinearOpMode {
         slidesJoint.setTargetPosition(slidesJointTargetPos);
         slidesJoint.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
+
+
+        // Initialize camera
+        int cameraMonitorViewId = hardwareMap.appContext.getResources()
+                .getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
+        camera = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
+
+        // Set the pipeline
+        bluePipeline = new BlueSamplePipeline();
+        yellowPipeline = new YellowSamplePipeline();
+        camera.setPipeline(bluePipeline);
+
+        // Open the camera
+        camera.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
+            @Override
+            public void onOpened() {
+                camera.startStreaming(640, 480, OpenCvCameraRotation.UPRIGHT);
+                FtcDashboard.getInstance().startCameraStream(camera, 30);
+            }
+
+            @Override
+            public void onError(int errorCode) {
+                telemetry.addData("Camera Error", "Error Code: " + errorCode);
+                telemetry.update();
+            }
+        });
         // FTC Dashboard
         FtcDashboard dashboard = FtcDashboard.getInstance();
-        //WebcamAlignment webcam = new WebcamAlignment();
-        //AlignmentPipeline pipeline = new AlignmentPipeline();
+        RotatingPipeline blueSampleWebcam = new RotatingPipeline();
         ArmSub slidesSub = new ArmSub(hardwareMap, telemetry);
         SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
 
-        
+
         waitForStart();
         timer.reset();
 
@@ -158,8 +193,8 @@ public class TeleOp3_2OneController extends LinearOpMode {
                 slides.setPower(1);
             }
 
-            double driving = -gamepad1.right_stick_y; // Forward/backward
-            double turning = gamepad1.right_stick_x; // Turning
+            double driving = -gamepad1.right_stick_y * drivingMult; // Forward/backward
+            double turning = gamepad1.left_stick_x * turningMult; // Turning
             double strafing = gamepad1.right_trigger - gamepad1.left_trigger; // Strafing
 
             // Combine inputs for each motor
@@ -186,9 +221,10 @@ public class TeleOp3_2OneController extends LinearOpMode {
             backRight.setPower(backRightPower);
 
             //if (gamepad1.a)
-                //webcam.alignOnce(drive, pipeline, slidesSub);
+            //webcam.alignOnce(drive, pipeline, slidesSub);
+
             /*
-            if (gamepad1.right_bumper) {
+            if (gamepad2.right_bumper) {
                 slidesJointTargetPos = 2500;
                 slidesTargetPos = 150;
             }
@@ -196,24 +232,24 @@ public class TeleOp3_2OneController extends LinearOpMode {
              */
 
             //slides controls
-            slidesTargetPos += (int) (-gamepad1.left_stick_y * 30);
+            slidesTargetPos += (int) (-gamepad2.left_stick_y * 50);
 
             slides.setTargetPosition(slidesTargetPos);
             slides.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             slides.setPower(1);
 
             // Read joystick input, right stick Y-axis controls the motor position
-            double joystickInput = -gamepad1.left_stick_x;
+            double joystickInput = -gamepad2.right_stick_y;
 
             //joint controls
-            slidesJointTargetPos += (int) (joystickInput * 20);
+            slidesJointTargetPos += (int) (joystickInput * 50);
 
             slidesJoint.setTargetPosition(slidesJointTargetPos);
             slidesJoint.setPower(0.5);
 
             //code for manual reset of slides and slidesjoint hardstop
             //NEEDS TO BE RE-ADDED AFTER DONE WITH TESTING
-
+            /*
             if (gamepad2.back){
                 slidesJoint.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                 slidesJointTargetPos = 0;
@@ -226,77 +262,109 @@ public class TeleOp3_2OneController extends LinearOpMode {
                 slides.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             }
 
-            // Check for button presses to set predefined positions
-            if (gamepad1.dpad_down) {    //set arm and slides position for intaking/init
-                slidesJointTargetPos = armInitPos;
-                slidesTargetPos = 0;
-                jointServoPos = 0.5;
-                spinnyPos = spinnyNormalPos;
+             */
 
-            } else if (gamepad1.dpad_up) {    //arm and slide position for high basket
+            // Check for button presses to set predefined positions
+            if (gamepad2.dpad_down) {    //set arm and slides position for intaking/init
+                if (previousBasketState){
+                    previousBasketState = false;
+                    basketTimer.reset();
+                    slidesTargetPos = 0;
+                    jointServoPos = 0.5;
+                    spinnyPos = spinnyNormalPos;
+                    if(basketTimer.seconds() > 2){
+                        slidesJointTargetPos = armInitPos;
+                    }
+                }
+                else {
+                    slidesJointTargetPos = armInitPos;
+                    slidesTargetPos = 0;
+                    jointServoPos = 0.5;
+                    spinnyPos = spinnyNormalPos;
+                }
+
+            } else if (gamepad2.dpad_up) {    //arm and slide position for high basket
                 slidesJointTargetPos = armBasketPos;
                 slidesTargetPos = 3950;
-                jointServoPos = 0.5;
+                jointServoPos = 0;
                 spinnyPos = spinnyNormalPos;
-
-            } else if (gamepad1.dpad_left) {   //arm and slide pos for high chamber
+                previousBasketState = true;
+            } else if (gamepad2.dpad_left) {   //arm and slide pos for high chamber
                 slidesJointTargetPos = armChamberPos;
-                slidesTargetPos = 800;
+                slidesTargetPos = 600;
                 spinnyPos = 0.05;
                 jointServoPos = 0;
-            } else if (gamepad1.dpad_right) {   //arm and slide pos for Sub intaking
+            } else if (gamepad2.dpad_right) {   //arm and slide pos for Sub intaking
                 slidesJointTargetPos = armDrivingAroundPos;
                 jointServoPos = 0.45;
                 spinnyPos = spinnyNormalPos;
                 slidesTargetPos = 330;
             }
 
-            /*
-            if (slidesTargetPos < 500 && jointServoPos < 0.25)
-                    jointServoPos = 0.25;
-
-             */
-
             if (slidesJointTargetPos > 0 && slidesJointTargetPos <850) {
-                if (slidesTargetPos > 3000) {
-                    slidesTargetPos = 3000;
+                if (slidesTargetPos > 1800) {
+                    slidesTargetPos = 1800;
                 }
             }
+
+            //if the joint servo is open, then the hardstop for the slides should be no more than 1470
+
 
             if (Math.abs(slides.getCurrentPosition() - slidesTargetPos) <= 10){
                 slides.setPower(0.25);
             }
 
-            if (gamepad1.x){
+
+            if (gamepad2.back){
                 jointServoPos += 0.05;
             }
-            else if (gamepad1.y){
+            else if (gamepad2.start){
                 jointServoPos -= 0.05;
             }
             if (jointServoPos < 0)
-                    jointServoPos = 0;
+                jointServoPos = 0;
             if (jointServoPos > 1)
                 jointServoPos = 1;
             joint.setPosition(jointServoPos);
 
-            if (gamepad1.start)
-                spinnyPos -= 0.05;
-            else if (gamepad1.back)
-                spinnyPos +=0.05;
+            spinnyPos += (gamepad2.left_trigger/15) - (gamepad2.right_trigger/15);
             if (spinnyPos > 1)
-                    spinnyPos = 1;
+                spinnyPos = 1;
             else if (spinnyPos < 0)
                 spinnyPos = 0;
 
-            if(gamepad1.b){
+            if(gamepad2.b){
                 spinnyPos = spinnyNormalPos;
+            }
+            if (gamepad2.x) {
+                spinnyPos = RotatingPipeline.calcServoPosFromAngle(bluePipeline.sampleAngle);
+            }
+
+            if (gamepad2.y) {
+                camera.setPipeline(yellowPipeline);
+                spinnyPos = RotatingPipeline.calcServoPosFromAngle(yellowPipeline.sampleAngle);
+
             }
 
             spinny.setPosition(spinnyPos);
 
+            // Send telemetry to the dashboard
+            //telemetry.addData("Joystick Input", joystickInput);
+            //telemetry.addData("PID Enabled", pidEnabled);
+            //telemetry.addData("Setpoint", setpoint);
+            telemetry.addData("Joint Target", slidesJointTargetPos);
+            telemetry.addData("Slides Joint Pos ", slidesJoint.getCurrentPosition());
+            telemetry.addData("Slides Pos", slides.getCurrentPosition());
+            telemetry.addData("Slides Target Position", slidesTargetPos);
+            telemetry.addData("slides power", slides.getPower());
+            telemetry.addData("Spinny Target Pos",spinnyPos);
+            telemetry.addData("Spinny Actual Pos", spinny.getPosition());
+            telemetry.addData("Joint Target Pos",jointServoPos);
+            telemetry.addData("Joint Actual Pos", joint.getPosition());
+            telemetry.update();
 
             // Toggle claw opening/closing when 'A' button is pressed
-            boolean currentAState = gamepad1.a;
+            boolean currentAState = gamepad2.a;
             if (currentAState && !previousAState) {
                 // Toggle the open/close state
                 isOpen = !isOpen;
@@ -310,7 +378,7 @@ public class TeleOp3_2OneController extends LinearOpMode {
             // Update the previous state of the 'A' button
             previousAState = currentAState;
 
-            boolean currentLBState = gamepad1.left_bumper;
+            boolean currentLBState = gamepad2.left_bumper;
             if (currentLBState && !previousLBState) {
                 // Toggle the state of the claw's servo joint
                 isUp = !isUp;
@@ -324,58 +392,42 @@ public class TeleOp3_2OneController extends LinearOpMode {
             // Update the previous state of the 'LB' button
             previousLBState = currentLBState;
 
-        if (gamepad1.right_bumper)
-            delivering = true;
+            if (gamepad2.right_bumper)
+                delivering = true;
 
 
-        //Distance sensor stuff
-        double distance = distanceSensor.getDistance(DistanceUnit.CM);
+            //Distance sensor stuff
+            double distance = distanceSensor.getDistance(DistanceUnit.CM);
 
-        if(delivering){
-            while(distance > 25){
-                frontLeftPower = -slowSpeed;
-                backLeftPower = -slowSpeed;
-                frontRightPower = -slowSpeed;
-                backRightPower = -slowSpeed;
+            if(delivering){
 
-                // Set motor powers
-                frontLeft.setPower(frontLeftPower);
-                frontRight.setPower(frontRightPower);
-                backLeft.setPower(backLeftPower);
-                backRight.setPower(backRightPower);
+                while(distance > 27){
+                    frontLeftPower = -0.4;
+                    backLeftPower = -0.4;
+                    frontRightPower = -0.4;
+                    backRightPower = -0.4;
 
-                distance = distanceSensor.getDistance(DistanceUnit.CM);
+                    // Set motor powers
+                    frontLeft.setPower(frontLeftPower);
+                    frontRight.setPower(frontRightPower);
+                    backLeft.setPower(backLeftPower);
+                    backRight.setPower(backRightPower);
+
+                    distance = distanceSensor.getDistance(DistanceUnit.CM);
+
+                }
+
+                frontLeft.setPower(0);
+                backLeft.setPower(0);
+                frontRight.setPower(0);
+                backRight.setPower(0);
+                delivering = false;
+
+                slidesJointTargetPos = 2500;
+                slidesTargetPos = 225;
             }
 
-            frontLeft.setPower(0);
-            backLeft.setPower(0);
-            frontRight.setPower(0);
-            backRight.setPower(0);
-            delivering = false;
-
-            slidesJointTargetPos = 2500;
-            slidesTargetPos = 225;
-
         }
-
-
-
-            //telemetry.addData("Joystick Input", joystickInput);
-            telemetry = FtcDashboard.getInstance().getTelemetry();
-            telemetry.addData("Joint Target", slidesJointTargetPos);
-            telemetry.addData("Slides Joint Pos ", slidesJoint.getCurrentPosition());
-            telemetry.addData("Slides Target Position", slidesTargetPos);
-            telemetry.addData("Slides Pos", slides.getCurrentPosition());
-            telemetry.addData("slides power", slides.getPower());
-            telemetry.addData("Spinny Target Pos",spinnyPos);
-            telemetry.addData("Spinny Actual Pos", spinny.getPosition());
-            telemetry.addData("Joint Target Pos",jointServoPos);
-            telemetry.addData("Joint Actual Pos", joint.getPosition());
-            telemetry.addData("distance", distance);
-            telemetry.addData("delivery mode activated", delivering);
-            telemetry.update();
-
-
-        }
+        camera.stopStreaming();
     }
 }

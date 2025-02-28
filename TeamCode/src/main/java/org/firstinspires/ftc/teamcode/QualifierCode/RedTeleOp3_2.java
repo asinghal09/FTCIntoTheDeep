@@ -7,19 +7,23 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
+
+import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-
-
 import org.firstinspires.ftc.teamcode.RoadRunner05x.drive.SampleMecanumDrive;
+import org.firstinspires.ftc.teamcode.testing.camera.RotatingPipeline;
+import org.openftc.easyopencv.OpenCvCamera;
+import org.openftc.easyopencv.OpenCvCameraFactory;
+import org.openftc.easyopencv.OpenCvCameraRotation;
 
 
 @Config
 @TeleOp
 
-public class TeleOp3_2 extends LinearOpMode {
+public class RedTeleOp3_2 extends LinearOpMode {
 
     DcMotor frontLeft;
     DcMotor frontRight;
@@ -34,6 +38,10 @@ public class TeleOp3_2 extends LinearOpMode {
     ElapsedTime timer;
     ElapsedTime basketTimer;
 
+    OpenCvCamera camera;
+    RedSamplePipeline redPipeline;
+    YellowSamplePipeline yellowPipeline;
+
     private boolean previousBasketState = false;
 
     private boolean moveForward = false;
@@ -45,8 +53,8 @@ public class TeleOp3_2 extends LinearOpMode {
 
     boolean isUp = false;               //for toggling joint up vs down position based on left bumper
     boolean previousLBState = false;
-    public static double clawOpen = 0.9;
-    public static double clawClose = 0.63;
+    public static double clawOpen = 0.65;
+    public static double clawClose = 0.41;
 
     public static double spinnyNormalPos = 0.75;
 
@@ -79,7 +87,7 @@ public class TeleOp3_2 extends LinearOpMode {
     // Predefined positions for the arm
     public static int armInitPos = 300;
     public static int armDrivingAroundPos = 450;
-    public static int armBasketPos = 1650;
+    public static int armBasketPos = 1850;
     public static int armChamberPos = 2000;
     public static int maxSlideJointPos = 2500;
     public static int minJointPos = 0;
@@ -121,10 +129,35 @@ public class TeleOp3_2 extends LinearOpMode {
         slidesJoint.setTargetPosition(slidesJointTargetPos);
         slidesJoint.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
+
+
+        // Initialize camera
+        int cameraMonitorViewId = hardwareMap.appContext.getResources()
+                .getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
+        camera = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
+
+        // Set the pipeline
+        redPipeline = new RedSamplePipeline();
+        yellowPipeline = new YellowSamplePipeline();
+        camera.setPipeline(redPipeline);
+
+        // Open the camera
+        camera.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
+            @Override
+            public void onOpened() {
+                camera.startStreaming(640, 480, OpenCvCameraRotation.UPRIGHT);
+                FtcDashboard.getInstance().startCameraStream(camera, 30);
+            }
+
+            @Override
+            public void onError(int errorCode) {
+                telemetry.addData("Camera Error", "Error Code: " + errorCode);
+                telemetry.update();
+            }
+        });
         // FTC Dashboard
         FtcDashboard dashboard = FtcDashboard.getInstance();
-        //WebcamAlignment webcam = new WebcamAlignment();
-        //AlignmentPipeline pipeline = new AlignmentPipeline();
+        RotatingPipeline blueSampleWebcam = new RotatingPipeline();
         ArmSub slidesSub = new ArmSub(hardwareMap, telemetry);
         SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
 
@@ -251,12 +284,12 @@ public class TeleOp3_2 extends LinearOpMode {
             } else if (gamepad2.dpad_up) {    //arm and slide position for high basket
                 slidesJointTargetPos = armBasketPos;
                 slidesTargetPos = 3950;
-                jointServoPos = 0.5;
+                jointServoPos = 0;
                 spinnyPos = spinnyNormalPos;
                 previousBasketState = true;
             } else if (gamepad2.dpad_left) {   //arm and slide pos for high chamber
                 slidesJointTargetPos = armChamberPos;
-                slidesTargetPos = 800;
+                slidesTargetPos = 600;
                 spinnyPos = 0.05;
                 jointServoPos = 0;
             } else if (gamepad2.dpad_right) {   //arm and slide pos for Sub intaking
@@ -280,10 +313,10 @@ public class TeleOp3_2 extends LinearOpMode {
             }
 
 
-            if (gamepad2.x){
+            if (gamepad2.back){
                 jointServoPos += 0.05;
             }
-            else if (gamepad2.y){
+            else if (gamepad2.start){
                 jointServoPos -= 0.05;
             }
             if (jointServoPos < 0)
@@ -292,10 +325,7 @@ public class TeleOp3_2 extends LinearOpMode {
                 jointServoPos = 1;
             joint.setPosition(jointServoPos);
 
-            if (gamepad2.start)
-                spinnyPos -= 0.05;
-            else if (gamepad2.back)
-                spinnyPos +=0.05;
+            spinnyPos += (gamepad2.left_trigger/15) - (gamepad2.right_trigger/15);
             if (spinnyPos > 1)
                 spinnyPos = 1;
             else if (spinnyPos < 0)
@@ -303,6 +333,15 @@ public class TeleOp3_2 extends LinearOpMode {
 
             if(gamepad2.b){
                 spinnyPos = spinnyNormalPos;
+            }
+            if (gamepad2.x) {
+                spinnyPos = RotatingPipeline.calcServoPosFromAngle(redPipeline.sampleAngle);
+            }
+
+            if (gamepad2.y) {
+                camera.setPipeline(yellowPipeline);
+                spinnyPos = RotatingPipeline.calcServoPosFromAngle(yellowPipeline.sampleAngle);
+
             }
 
             spinny.setPosition(spinnyPos);
@@ -360,7 +399,7 @@ public class TeleOp3_2 extends LinearOpMode {
 
             if(delivering){
 
-                while(distance > 25){
+                while(distance > 27){
                     frontLeftPower = -0.4;
                     backLeftPower = -0.4;
                     frontRightPower = -0.4;
@@ -382,10 +421,11 @@ public class TeleOp3_2 extends LinearOpMode {
                 backRight.setPower(0);
                 delivering = false;
 
-                slidesJointTargetPos = 2300;
+                slidesJointTargetPos = 2500;
                 slidesTargetPos = 225;
             }
 
         }
+        camera.stopStreaming();
     }
 }
