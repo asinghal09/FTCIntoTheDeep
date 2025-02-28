@@ -27,20 +27,19 @@ public class sensor2 extends LinearOpMode {
 
     Servo clawServo;
 
-    private static final double SERVO_MIN = 0.0; // Minimum servo position
-    private static final double SERVO_MAX = 1.0; // Maximum servo position
-    private static final double SERVO_NEUTRAL = 0.5; // Neutral position if needed for initialization
+    private static final double SERVO_MIN_DEG = 0.0;   // Servo min angle in degrees
+    private static final double SERVO_MAX_DEG = 180.0; // Servo max angle in degrees
 
     @Override
     public void runOpMode() {
         // Initialize the claw servo
-        clawServo = hardwareMap.get(Servo.class, "claw");
-        clawServo.setPosition(SERVO_NEUTRAL); // Set the servo to a neutral position during initialization
+        clawServo = hardwareMap.get(Servo.class, "spinny");
+        clawServo.setPosition(90.0 / 180.0); // Set the servo to 90° (neutral position) during initialization
 
         // Initialize camera
         int cameraMonitorViewId = hardwareMap.appContext.getResources()
                 .getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
-        camera = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "camera"), cameraMonitorViewId);
+        camera = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
 
         // Set the pipeline
         pipeline = new SamplePipeline();
@@ -72,10 +71,15 @@ public class sensor2 extends LinearOpMode {
 
                 // Align claw if a button is pressed (e.g., "A" button)
                 if (gamepad1.a) {
-                    double servoPosition = mapAngleToServo(pipeline.sampleAngle);
-                    clawServo.setPosition(servoPosition);
+                    telemetry.addData("Button Press", "A button pressed");
+
+                    double servoAngle = mapAngleToServo(pipeline.sampleAngle);
+
+                    // Convert degrees to servo range (0-1)
+                    clawServo.setPosition(servoAngle / 180.0);
+
                     telemetry.addData("Claw Alignment", "Aligned to %.2f° -> Servo Pos: %.2f",
-                            pipeline.sampleAngle, servoPosition);
+                            pipeline.sampleAngle, servoAngle);
                 }
             } else {
                 telemetry.addData("Sample", "Not Detected");
@@ -87,15 +91,19 @@ public class sensor2 extends LinearOpMode {
         camera.stopStreaming();
     }
 
-    // Maps a sample angle (-90 to 90) to a servo position (0 to 1)
+    // Maps a sample angle (-90 to 90) to a servo angle (0 to 180 degrees)
     private double mapAngleToServo(double angle) {
-        // Normalize angle to servo range (0 to 1)
-        return SERVO_MIN + ((angle + 90) / 180.0) * (SERVO_MAX - SERVO_MIN);
+        double servoAngle = angle + 90; // Shift the range from (-90 to 90) -> (0 to 180)
+
+        // Safety check to keep within servo's physical range
+        servoAngle = Math.max(SERVO_MIN_DEG, Math.min(SERVO_MAX_DEG, servoAngle));
+
+        return servoAngle;
     }
 
     // OpenCV Pipeline
     class SamplePipeline extends OpenCvPipeline {
-        private Mat hsv = new Mat(); // Declare and initialize outside processFrame
+        private Mat hsv = new Mat();
         private Mat mask = new Mat();
         private Mat hierarchy = new Mat();
 
@@ -105,12 +113,11 @@ public class sensor2 extends LinearOpMode {
 
         @Override
         public Mat processFrame(Mat input) {
-            // Reuse Mat objects instead of creating new ones
             Imgproc.cvtColor(input, hsv, Imgproc.COLOR_RGB2HSV);
 
             // Define the range for detecting a specific color (e.g., red)
-            Scalar lowerBound = new Scalar(0, 100, 100);  // Adjust these values
-            Scalar upperBound = new Scalar(10, 255, 255); // Adjust these values
+            Scalar lowerBound = new Scalar(0, 100, 100);
+            Scalar upperBound = new Scalar(10, 255, 255);
 
             // Create a mask for the color
             Core.inRange(hsv, lowerBound, upperBound, mask);
@@ -133,11 +140,10 @@ public class sensor2 extends LinearOpMode {
                     largestRect = rect;
                 }
 
-                contour2f.release(); // Release memory for temporary MatOfPoint2f
+                contour2f.release();
             }
 
             if (largestRect != null) {
-                // Calculate the angle and position of the detected sample
                 sampleAngle = largestRect.angle;
 
                 // Normalize angle to -90 to 90 degrees
@@ -145,7 +151,6 @@ public class sensor2 extends LinearOpMode {
                     sampleAngle += 90;
                 }
 
-                // Get the center of the detected sample
                 sampleX = largestRect.center.x;
                 sampleY = largestRect.center.y;
 
@@ -157,18 +162,16 @@ public class sensor2 extends LinearOpMode {
                 }
                 Imgproc.circle(input, largestRect.center, 5, new Scalar(255, 0, 0), -1);
             } else {
-                // No sample detected; reset values
                 sampleX = -1;
                 sampleY = -1;
                 sampleAngle = -1;
             }
 
-            return input; // Return the modified input frame
+            return input;
         }
 
         @Override
         public void finalize() {
-            // Release resources when the pipeline is destroyed
             hsv.release();
             mask.release();
             hierarchy.release();

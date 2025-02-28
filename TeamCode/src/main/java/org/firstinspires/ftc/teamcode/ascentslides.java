@@ -60,7 +60,7 @@ public class ascentslides extends OpMode{
 
         //calculate power
         double frontLeftPower = drive + turn + strafe;
-        double frontRightPower = drive - turn - strafe; 0: frontLeft 1: backleft 2: frontright 3: backright
+        double frontRightPower = drive - turn - strafe;
         double backLeftPower = drive + turn - strafe;
         double backRightPower = drive - turn + strafe;
 
