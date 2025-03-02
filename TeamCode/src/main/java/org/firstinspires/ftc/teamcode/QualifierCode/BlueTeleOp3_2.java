@@ -7,6 +7,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -35,10 +36,17 @@ public class BlueTeleOp3_2 extends LinearOpMode {
     DcMotorEx slidesJoint;
     DcMotorEx slides;
     Servo claw, joint, spinny;
+    Servo rightHook, leftHook;
 
     DistanceSensor distanceSensor;
     ElapsedTime timer;
     ElapsedTime basketTimer;
+    ElapsedTime drivingTimer;
+
+    ElapsedTime specimenTimer;
+
+    DigitalChannel armMag;
+    DigitalChannel slidesMag;
 
     OpenCvCamera camera;
     BlueSamplePipeline bluePipeline;
@@ -58,7 +66,7 @@ public class BlueTeleOp3_2 extends LinearOpMode {
     public static double clawOpen = 0.65;
     public static double clawClose = 0.41;
 
-    public static double spinnyNormalPos = 0.75;
+    public static double spinnyNormalPos = 0.78;
 
     public static double spinnyPos = 0.75;
     public static double jointServoPos = 1;
@@ -109,13 +117,21 @@ public class BlueTeleOp3_2 extends LinearOpMode {
         joint = hardwareMap.get(Servo.class, "joint");
         spinny = hardwareMap.get(Servo.class, "spinny");
 
+        rightHook = hardwareMap.get(Servo.class,"rightHook");
+        leftHook = hardwareMap.get(Servo.class,"leftHook");
+
         slidesJoint = hardwareMap.get(DcMotorEx.class, "slidesJoint");
         slides = hardwareMap.get(DcMotorEx.class, "slides");
         distanceSensor = hardwareMap.get(DistanceSensor.class, "distanceSensor");
 
+        armMag = hardwareMap.get(DigitalChannel.class, "armMag");
+        slidesMag = hardwareMap.get(DigitalChannel.class, "slidesMag");
+
 
         timer = new ElapsedTime();
         basketTimer = new ElapsedTime();
+        specimenTimer = new ElapsedTime();
+        drivingTimer = new ElapsedTime();
 
         slidesJoint.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         slidesJoint.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -171,26 +187,65 @@ public class BlueTeleOp3_2 extends LinearOpMode {
 
         lastTime = System.currentTimeMillis();
 
-        while (opModeIsActive()) {
+        while (opModeIsActive() && !isStopRequested()) {
 
-            if(timer.seconds() > 15){
-                if (slidesJointTargetPos > maxSlideJointPos) {          //joint hardstops
-                    slidesJointTargetPos = maxSlideJointPos;
-                } else
-                if (slidesJointTargetPos <0){
-                    slidesJointTargetPos = 0;
+
+            if (slidesJointTargetPos > maxSlideJointPos) {          //joint hardstops
+                slidesJointTargetPos = maxSlideJointPos;
+            } else
+            if (slidesJointTargetPos <0){
+                slidesJointTargetPos = 0;
+            }
+            slidesJoint.setTargetPosition(slidesJointTargetPos);
+            slidesJoint.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+            if (slidesTargetPos < 0) //slides hardstops
+                slidesTargetPos = 0;
+            else if(slidesTargetPos > maxSlidePos)
+                slidesTargetPos = maxSlidePos;
+
+            slides.setTargetPosition(slidesTargetPos);
+            slides.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            slides.setPower(1);
+
+
+            if (gamepad2.right_stick_button) {                      //for arm
+
+                while (opModeIsActive() && armMag.getState()) {
+                    slidesJoint.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                    slidesJoint.setPower(-0.25);  // Move arm down
+
                 }
-                slidesJoint.setTargetPosition(slidesJointTargetPos);
+
+                slidesJoint.setPower(-0.2);
+                sleep (95);
+                slidesJoint.setPower(0);
+
+                // Reset encoder position to zero
+                slidesJoint.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                 slidesJoint.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                slidesJointTargetPos = 0;
+                slidesJoint.setTargetPosition(slidesJointTargetPos);
+            }
 
-                if (slidesTargetPos < 0) //slides hardstops
-                    slidesTargetPos = 0;
-                else if(slidesTargetPos > maxSlidePos)
-                    slidesTargetPos = maxSlidePos;
 
-                slides.setTargetPosition(slidesTargetPos);
+            if (gamepad2.left_stick_button) {                 //slides reset
+
+                while (opModeIsActive() && slidesMag.getState()) {
+                    slides.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                    slides.setPower(-0.25);  // Move arm down
+
+                }
+
+                slides.setPower(-0.2);
+                sleep (20);
+                slides.setPower(0);
+
+                // Reset encoder position to zero
+                slides.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                 slides.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                slides.setPower(1);
+                slidesTargetPos = 0;
+                slides.setTargetPosition(slidesTargetPos);
             }
 
             double driving = -gamepad1.right_stick_y * drivingMult; // Forward/backward
@@ -270,7 +325,7 @@ public class BlueTeleOp3_2 extends LinearOpMode {
                     previousBasketState = false;
                     basketTimer.reset();
                     slidesTargetPos = 0;
-                    jointServoPos = 0.5;
+                    jointServoPos = 1;
                     spinnyPos = spinnyNormalPos;
                     if(basketTimer.seconds() > 2){
                         slidesJointTargetPos = armInitPos;
@@ -296,22 +351,31 @@ public class BlueTeleOp3_2 extends LinearOpMode {
                 jointServoPos = 0;
             } else if (gamepad2.dpad_right) {   //arm and slide pos for Sub intaking
                 slidesJointTargetPos = armDrivingAroundPos;
-                jointServoPos = 0.45;
+                jointServoPos = 0.25;
                 spinnyPos = spinnyNormalPos;
                 slidesTargetPos = 330;
             }
 
             if (slidesJointTargetPos > 0 && slidesJointTargetPos <850) {
-                if (slidesTargetPos > 1800) {
-                    slidesTargetPos = 1800;
+                if (jointServoPos < 0.75 && slidesTargetPos > 1000){
+                    slidesTargetPos = 1000;
+                }
+                else if (jointServoPos < 1 && jointServoPos >= 0.75 && slidesTargetPos > 1250){
+                    slidesTargetPos = 1250;
+                }
+
+                if (slidesTargetPos > 1425) {
+                    slidesTargetPos = 1425;
                 }
             }
-
-            //if the joint servo is open, then the hardstop for the slides should be no more than 1470
 
 
             if (Math.abs(slides.getCurrentPosition() - slidesTargetPos) <= 10){
                 slides.setPower(0.25);
+            }
+
+            if (slidesJointTargetPos > 2000 && slidesTargetPos > 300){
+                slidesTargetPos = 300;
             }
 
 
@@ -361,6 +425,8 @@ public class BlueTeleOp3_2 extends LinearOpMode {
             telemetry.addData("Spinny Actual Pos", spinny.getPosition());
             telemetry.addData("Joint Target Pos",jointServoPos);
             telemetry.addData("Joint Actual Pos", joint.getPosition());
+            telemetry.addData("driving time", drivingTimer.seconds());
+            telemetry.addData("spec time", specimenTimer.seconds());
             telemetry.update();
 
             // Toggle claw opening/closing when 'A' button is pressed
@@ -384,7 +450,7 @@ public class BlueTeleOp3_2 extends LinearOpMode {
                 isUp = !isUp;
 
                 if (isUp) {
-                    jointServoPos = 0.5;
+                    jointServoPos = 0.75;
                 } else {
                     jointServoPos = 1;
                 }
@@ -392,12 +458,30 @@ public class BlueTeleOp3_2 extends LinearOpMode {
             // Update the previous state of the 'LB' button
             previousLBState = currentLBState;
 
-            if (gamepad2.right_bumper)
+            if (gamepad2.right_bumper) {
                 delivering = true;
-
+                specimenTimer.reset();
+            }
 
             //Distance sensor stuff
             double distance = distanceSensor.getDistance(DistanceUnit.CM);
+
+
+            if (gamepad2.guide){
+                frontLeft.setPower(0.5);
+                backLeft.setPower(0.5);
+                frontRight.setPower(0.5);
+                backRight.setPower(0.5);
+
+                sleep(400);
+
+                frontLeft.setPower(0);
+                backLeft.setPower(0);
+                frontRight.setPower(0);
+                backRight.setPower(0);
+
+            }
+
 
             if(delivering){
 
@@ -423,8 +507,10 @@ public class BlueTeleOp3_2 extends LinearOpMode {
                 backRight.setPower(0);
                 delivering = false;
 
-                slidesJointTargetPos = 2500;
+                slidesJointTargetPos = 2400;
                 slidesTargetPos = 225;
+
+
             }
 
         }

@@ -39,11 +39,11 @@ public class NetAutoFinal extends LinearOpMode {
                     slidesSubsystem.setJoint(0);
                 })
                 .resetConstraints()
-                .addTemporalMarker(3, () -> {
+                .addTemporalMarker(2.8, () -> {
                     slidesSubsystem.clawOpen();
                 })
                 .setReversed(false)
-                .waitSeconds(0.5)
+                .waitSeconds(0.3)
                 .setVelConstraint(new MinVelocityConstraint(Arrays.asList(new TranslationalVelocityConstraint(15))))
                 .splineToSplineHeading(new Pose2d(46.75,41.5,Math.toRadians(270)), Math.toRadians(270)) // to first sample
                 .addTemporalMarker(3.25, () -> {
@@ -60,8 +60,8 @@ public class NetAutoFinal extends LinearOpMode {
                     slidesSubsystem.runArmToPos(115,0.6);
 
                 })
-                .waitSeconds(1.15)
-                .addTemporalMarker(5.3, () -> {
+                .waitSeconds(1.35)
+                .addTemporalMarker(5.25, () -> {
                     slidesSubsystem.clawClose();
                 })
                 .setReversed(true)
@@ -76,7 +76,7 @@ public class NetAutoFinal extends LinearOpMode {
                     slidesSubsystem.setSlides(4100);
                 })
                 .addTemporalMarker(6.25, () -> {
-                    slidesSubsystem.runArmToPos(1750,0.3);
+                    slidesSubsystem.runArmToPos(1725,0.3);
                     slidesSubsystem.setJoint(0.1);
                 })
                 .waitSeconds(1)
@@ -85,7 +85,7 @@ public class NetAutoFinal extends LinearOpMode {
                 })
 
                 .setReversed(false)
-                .splineToSplineHeading(new Pose2d(56.5,41.5,Math.toRadians(270)), Math.toRadians(0)) // to 2nd sample
+                .splineToSplineHeading(new Pose2d(55,41.5,Math.toRadians(270)), Math.toRadians(0)) // to 2nd sample
                 .addTemporalMarker(7.5, () -> {
                     slidesSubsystem.runArmToPos(1650, 1);
                 })
@@ -94,24 +94,22 @@ public class NetAutoFinal extends LinearOpMode {
                     slidesSubsystem.setJoint(1);
                 })
                 .addTemporalMarker(8.25, () -> {
-                    slidesSubsystem.runArmToPos(115,0.35);
+                    slidesSubsystem.runArmToPos(105,0.35);
 
                 })
                 .waitSeconds(1.25)
                 .addTemporalMarker(10, () -> {
                     slidesSubsystem.clawClose();
                 })
-                .addTemporalMarker(10.5, () -> {
-                    slidesSubsystem.runArmToPos(1600,0.8);
-                })
+
                 .waitSeconds(0.75)
 
                 .setReversed(true)
 
                 .splineToConstantHeading(new Vector2d(46.75,41.5), Math.toRadians(270)) // to first sample pos
-                .splineToSplineHeading(new Pose2d(50, 50, Math.toRadians(225)), Math.toRadians(45)) //to basket 2nd sample
+                .splineToSplineHeading(new Pose2d(50, 50, Math.toRadians(225)), Math.toRadians(90)) //to basket 2nd sample
                 .addTemporalMarker(10.5, () -> {
-                    slidesSubsystem.runArmToPos(1750,0.7);
+                    slidesSubsystem.runArmToPos(1715,0.7);
                     slidesSubsystem.setJoint(0.1);
                     slidesSubsystem.setSlides(4100);
                 })
@@ -125,57 +123,65 @@ public class NetAutoFinal extends LinearOpMode {
                 })
                 .addTemporalMarker(14, () -> {
 
-                    slidesSubsystem.setSlides(1000);
+                    slidesSubsystem.setSlides(1425);
                     slidesSubsystem.setJoint(1);
                     slidesSubsystem.spin(.5);
                 })
                 .addTemporalMarker(16, () -> {
 
-                    slidesSubsystem.runArmToPos(150,0.8);
+                    slidesSubsystem.runArmToPos(300,0.7);
+
+                })
+                .addTemporalMarker(17.25, () -> {
+
+                    slidesSubsystem.runArmToPos(100,0.3);
 
                 })
                 .setReversed(false)
                 .splineToSplineHeading(new Pose2d(48,28, Math.toRadians(0)), Math.toRadians(270)) // to 3rd sample
                 .setVelConstraint(new MinVelocityConstraint(Arrays.asList(new TranslationalVelocityConstraint(10))))
-                .splineToConstantHeading(new Vector2d(50,28),Math.toRadians(0))
+                .splineToConstantHeading(new Vector2d(52,25.25),Math.toRadians(0))
 
-                .addTemporalMarker(20, () -> {
+                .addTemporalMarker(18, () -> {
                     slidesSubsystem.clawClose();
                 })
 
-                .addTemporalMarker(20.25, () -> {
-                    slidesSubsystem.runArmToPos(1850,0.7);
+                .addTemporalMarker(18.5, () -> {
+                    slidesSubsystem.runArmToPos(1725,0.7);
                 })
 
-                .addTemporalMarker(20.75, () -> {
+                .addTemporalMarker(19, () -> {
                     slidesSubsystem.setSlides(4100);
-                    slidesSubsystem.setJoint(0);
+                    slidesSubsystem.setJoint(0.1);
                     slidesSubsystem.spin(0.75);
                 })
-                .waitSeconds(3)
+                .waitSeconds(1.5)
                 .setReversed(true)
-                .splineToSplineHeading(new Pose2d(53,53,Math.toRadians(225)), Math.toRadians(45)) // to basket w 3rd
-                .addTemporalMarker(23, () -> {
+                .setVelConstraint(new MinVelocityConstraint(Arrays.asList(new TranslationalVelocityConstraint(13))))
+                .splineToSplineHeading(new Pose2d(50,50,Math.toRadians(225)), Math.toRadians(45)) // to basket w 3rd
+                .addTemporalMarker(21, () -> {
                     slidesSubsystem.clawOpen();
                 })
                 .waitSeconds(0.25)
-                /*
 
-                .addTemporalMarker(24.5, () -> {
+                .addTemporalMarker(21.5, () -> {
 
-                    slidesSubsystem.setSlides(0);
+                    slidesSubsystem.runArmToPos(1400,1);
                     slidesSubsystem.setJoint(1);
                 })
-                .addTemporalMarker(25, () -> {
+                .addTemporalMarker(22.5, () -> {
 
-                    slidesSubsystem.runArmToPos(1900,0.8);
+                    slidesSubsystem.setSlides(0);
+                })
+                .addTemporalMarker(25.5, () -> {
+
+                    slidesSubsystem.runArmToPos(1900,0.7);
                 })
                 .setReversed(false)
-                .splineToSplineHeading(new Pose2d(27,15,Math.toRadians(0)),Math.toRadians(180)) // to level 1 ascent
+                .setVelConstraint(new MinVelocityConstraint(Arrays.asList(new TranslationalVelocityConstraint(17))))
+
+                .splineToSplineHeading(new Pose2d(27,13,Math.toRadians(0)),Math.toRadians(180)) // to level 1 ascent
                 .waitSeconds(2)
-
-                 */
-
 
                 .build();
 
